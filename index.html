@@ -1385,3 +1385,69 @@ updateAll();
 </script>
 </body>
 </html>
+<section id="net-truth-calculator" style="background: #1a1a1a; color: #00ff41; padding: 20px; border: 1px solid #333; border-radius: 8px; font-family: monospace;">
+    <h2 style="border-bottom: 1px solid #00ff41;">REAL-TIME NET TRUTH</h2>
+    
+    <div class="input-group" style="margin-bottom: 15px;">
+        <label>Gross Pay ($):</label>
+        <input type="number" id="grossPay" placeholder="0.00" style="background: #000; color: #00ff41; border: 1px solid #00ff41; padding: 5px;">
+    </div>
+
+    <div class="input-group" style="margin-bottom: 15px;">
+        <label>Platform Fee:</label>
+        <select id="platformFee" style="background: #000; color: #00ff41; border: 1px solid #00ff41; padding: 5px;">
+            <option value="0.10">WorkMarket (10%)</option>
+            <option value="0.15">Field Nation (15%)</option>
+            <option value="0">Direct/Other (0%)</option>
+        </select>
+    </div>
+
+    <div class="input-group" style="margin-bottom: 15px;">
+        <label>Round Trip Miles:</label>
+        <input type="number" id="miles" placeholder="0" style="background: #000; color: #00ff41; border: 1px solid #00ff41; padding: 5px;">
+    </div>
+
+    <hr style="border: 0.5px solid #333;">
+
+    <div id="results" style="line-height: 1.6;">
+        <p>Platform Take: <span id="displayFee" style="color: #ff4444;">$0.00</span></p>
+        <p>Mileage Deduction: <span id="displayMiles" style="color: #44ff44;">$0.00</span></p>
+        <p>IRS Tax Reserve (SE + Income): <span id="displayTax" style="color: #ff4444;">$0.00</span></p>
+        <h3 style="background: #00ff41; color: #000; padding: 10px; display: inline-block;">TAKE HOME: <span id="displayNet">$0.00</span></h3>
+    </div>
+</section>
+
+<script>
+    const grossInput = document.getElementById('grossPay');
+    const feeInput = document.getElementById('platformFee');
+    const milesInput = document.getElementById('miles');
+
+    function calculateTruth() {
+        const gross = parseFloat(grossInput.value) || 0;
+        const feePercent = parseFloat(feeInput.value);
+        const miles = parseFloat(milesInput.value) || 0;
+
+        // 1. Platform Cut
+        const platformCut = gross * feePercent;
+        
+        // 2. Mileage Value (2026 IRS Rate: $0.725)
+        const mileageDeduction = miles * 0.725;
+
+        // 3. Taxable Income (Gross - Platform Fee - Mileage)
+        const taxableIncome = gross - platformCut - mileageDeduction;
+        
+        // 4. Tax Reserve (15.3% SE + 10% Est. Income Tax = ~25% total on remaining)
+        const taxReserve = taxableIncome > 0 ? taxableIncome * 0.25 : 0;
+
+        // 5. THE TRUTH
+        const netTruth = gross - platformCut - taxReserve;
+
+        // Update Display
+        document.getElementById('displayFee').innerText = `-$${platformCut.toFixed(2)}`;
+        document.getElementById('displayMiles').innerText = `+$${mileageDeduction.toFixed(2)} (Tax Shield)`;
+        document.getElementById('displayTax').innerText = `-$${taxReserve.toFixed(2)}`;
+        document.getElementById('displayNet').innerText = `$${netTruth.toFixed(2)}`;
+    }
+
+    [grossInput, feeInput, milesInput].forEach(el => el.addEventListener('input', calculateTruth));
+</script>
