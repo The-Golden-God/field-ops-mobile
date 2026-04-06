@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Field-Ops Contractor OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a;
+  --bg2:#111111;
+  --bg3:#181818;
+  --bg4:#222222;
+  --lime:#00FF41;
+  --lime-dim:#00cc33;
+  --amber:#FFB100;
+  --amber-dim:#cc8e00;
+  --red:#FF4444;
+  --red-dim:#cc3333;
+  --text:#d4d4d4;
+  --text2:#777;
+  --text3:#444;
+  --border:#1e1e1e;
+  --border2:#2a2a2a;
+  --font:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+html,body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+
+/* ── HEADER ── */
+#header{
+  position:sticky;top:0;z-index:100;
+  background:var(--bg2);
+  border-bottom:1px solid var(--border2);
+  display:flex;align-items:center;
+  padding:0 20px;
+  height:48px;
+  gap:0;
+}
+.brand{
+  font-size:11px;font-weight:700;letter-spacing:0.15em;
+  color:var(--lime);text-transform:uppercase;
+  padding-right:20px;border-right:1px solid var(--border2);
+  margin-right:4px;white-space:nowrap;
+  display:flex;align-items:center;gap:8px;
+}
+.brand-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--lime);
+  box-shadow:0 0 6px var(--lime);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.nav{display:flex;gap:0;overflow-x:auto;flex:1}
+.nav::-webkit-scrollbar{height:0}
+.nav-btn{
+  padding:0 18px;height:48px;border:none;background:transparent;
+  color:var(--text2);cursor:pointer;font-family:var(--font);
+  font-size:11px;letter-spacing:0.08em;text-transform:uppercase;
+  border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;
+  white-space:nowrap;
+}
+.nav-btn:hover{color:var(--text)}
+.nav-btn.active{color:var(--lime);border-bottom-color:var(--lime)}
+.header-right{display:flex;gap:8px;margin-left:auto;padding-left:16px;border-left:1px solid var(--border2)}
+
+/* ── MAIN ── */
+#main{max-width:1200px;margin:0 auto;padding:20px}
+
+/* ── PANELS ── */
+.panel{display:none;animation:fadeIn 0.15s ease}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.kpi-grid.cols4{grid-template-columns:repeat(4,1fr)}
+.kpi{
+  background:var(--bg2);border:1px solid var(--border2);
+  padding:16px;border-radius:4px;position:relative;overflow:hidden;
+}
+.kpi::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--border2),transparent);
+}
+.kpi-label{font-size:10px;color:var(--text2);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px}
+.kpi-val{font-size:24px;font-weight:700;letter-spacing:-0.02em;line-height:1}
+.kpi-val.lime{color:var(--lime)}
+.kpi-val.amber{color:var(--amber)}
+.kpi-val.red{color:var(--red)}
+.kpi-val.neutral{color:var(--text)}
+.kpi-sub{font-size:10px;color:var(--text3);margin-top:6px}
+
+/* ── SECTION ── */
+.section{
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:4px;margin-bottom:12px;overflow:hidden;
+}
+.section-hdr{
+  padding:10px 16px;background:var(--bg3);
+  border-bottom:1px solid var(--border2);
+  font-size:10px;color:var(--amber);letter-spacing:0.12em;
+  text-transform:uppercase;display:flex;justify-content:space-between;
+  align-items:center;gap:8px;
+}
+.section-hdr-note{color:var(--text3);font-size:10px;letter-spacing:0.05em;text-transform:none}
+.section-body{padding:16px}
+
+/* ── FORMS ── */
+.form-row{display:grid;gap:10px;margin-bottom:10px}
+.form-row.c2{grid-template-columns:1fr 1fr}
+.form-row.c3{grid-template-columns:1fr 1fr 1fr}
+.form-row.c4{grid-template-columns:1fr 1fr 1fr 1fr}
+.form-group{}
+label{
+  font-size:10px;color:var(--text2);letter-spacing:0.1em;
+  text-transform:uppercase;display:block;margin-bottom:5px;
+}
+input[type=text],input[type=number],input[type=date],input[type=email],select,textarea{
+  width:100%;background:var(--bg3);border:1px solid var(--border2);
+  color:var(--text);padding:8px 10px;font-family:var(--font);font-size:12px;
+  border-radius:3px;outline:none;transition:border-color 0.15s;
+  -webkit-appearance:none;appearance:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--lime)}
+input::placeholder{color:var(--text3)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23555'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;cursor:pointer}
+select option{background:var(--bg3);color:var(--text)}
+
+/* ── BUTTONS ── */
+.btn{
+  padding:8px 18px;border:1px solid;border-radius:3px;cursor:pointer;
+  font-family:var(--font);font-size:11px;letter-spacing:0.1em;
+  text-transform:uppercase;transition:all 0.15s;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.btn:active{transform:scale(0.97)}
+.btn-lime{background:transparent;border-color:var(--lime);color:var(--lime)}
+.btn-lime:hover{background:var(--lime);color:#000}
+.btn-amber{background:transparent;border-color:var(--amber);color:var(--amber)}
+.btn-amber:hover{background:var(--amber);color:#000}
+.btn-red{background:transparent;border-color:var(--red);color:var(--red)}
+.btn-red:hover{background:var(--red);color:#fff}
+.btn-ghost{background:transparent;border-color:var(--border2);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--text2);color:var(--text)}
+.btn-sm{padding:5px 12px;font-size:10px}
+.btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center}
+
+/* ── TABLES ── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:600px}
+th{
+  font-size:10px;color:var(--text2);text-align:left;
+  padding:8px 12px;border-bottom:1px solid var(--border2);
+  letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;
+  background:var(--bg3);
+}
+td{
+  padding:9px 12px;border-bottom:1px solid var(--border);
+  font-size:12px;color:var(--text);vertical-align:middle;
+}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--bg3)}
+.td-mono{font-variant-numeric:tabular-nums}
+
+/* ── BADGES ── */
+.badge{
+  padding:2px 8px;border-radius:2px;font-size:10px;
+  letter-spacing:0.06em;text-transform:uppercase;white-space:nowrap;
+  display:inline-block;
+}
+.badge-paid{background:#051a05;color:var(--lime);border:1px solid #0d3a0d}
+.badge-pending{background:#1a1000;color:var(--amber);border:1px solid #3a2500}
+.badge-disputed{background:#1a0505;color:var(--red);border:1px solid #3a0f0f}
+.badge-cat{background:var(--bg3);color:var(--text2);border:1px solid var(--border2)}
+
+/* ── ALERTS ── */
+.alert{
+  padding:10px 14px;border-radius:3px;font-size:12px;
+  margin-bottom:12px;border-left:3px solid;
+}
+.alert-lime{background:#051a05;color:var(--lime);border-color:var(--lime)}
+.alert-amber{background:#1a1000;color:var(--amber);border-color:var(--amber)}
+.alert-red{background:#1a0505;color:var(--red);border-color:var(--red)}
+.alert:empty{display:none}
+
+/* ── EMPTY STATE ── */
+.empty{
+  text-align:center;padding:48px 24px;color:var(--text3);
+  font-size:12px;letter-spacing:0.05em;
+}
+.empty-icon{font-size:24px;margin-bottom:12px;opacity:0.3}
+
+/* ── DELETE BTN ── */
+.del-btn{
+  background:transparent;border:none;color:var(--text3);
+  cursor:pointer;font-size:13px;padding:2px 6px;border-radius:2px;
+  transition:all 0.1s;
+}
+.del-btn:hover{color:var(--red);background:#1a0505}
+
+/* ── TAX PANEL ── */
+.tax-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.tax-card{
+  background:var(--bg3);border:1px solid var(--border2);
+  padding:14px;border-radius:3px;text-align:center;
+}
+.tax-card-label{font-size:10px;color:var(--text2);margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase}
+.tax-card-val{font-size:18px;font-weight:700;letter-spacing:-0.01em}
+.divider{height:1px;background:var(--border2);margin:14px 0}
+.info-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:5px 0;font-size:12px;border-bottom:1px solid var(--border);
+}
+.info-row:last-child{border-bottom:none}
+.info-row-label{color:var(--text2)}
+.info-row-val{font-variant-numeric:tabular-nums;font-weight:500}
+.info-row.total{padding-top:10px;font-weight:700}
+
+/* ── VAULT OUTPUT ── */
+.vault-output{
+  background:var(--bg3);border:1px solid var(--lime);
+  padding:14px 16px;border-radius:3px;
+  font-size:13px;color:var(--lime);letter-spacing:0.04em;
+  word-break:break-all;line-height:1.6;margin-top:12px;
+}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:24px;right:24px;z-index:9999;
+  background:var(--bg3);border:1px solid var(--lime);
+  color:var(--lime);padding:10px 18px;border-radius:3px;
+  font-size:12px;letter-spacing:0.08em;
+  transform:translateY(80px);opacity:0;
+  transition:all 0.25s ease;pointer-events:none;
+}
+#toast.show{transform:translateY(0);opacity:1}
+
+/* ── MODAL ── */
+#modal-overlay{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,0.85);align-items:center;justify-content:center;
+}
+#modal-overlay.show{display:flex}
+.modal{
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:4px;width:90%;max-width:420px;overflow:hidden;
+}
+.modal-hdr{
+  padding:14px 18px;background:var(--bg3);border-bottom:1px solid var(--border2);
+  font-size:11px;color:var(--amber);letter-spacing:0.1em;text-transform:uppercase;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.modal-body{padding:18px}
+.modal-msg{font-size:13px;color:var(--text);line-height:1.6;margin-bottom:16px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  #main{padding:12px}
+  .kpi-grid,.kpi-grid.cols4{grid-template-columns:1fr 1fr}
+  .form-row.c3,.form-row.c4{grid-template-columns:1fr 1fr}
+  .tax-grid{grid-template-columns:1fr 1fr}
+  .kpi-val{font-size:18px}
+  .nav-btn{padding:0 12px;font-size:10px}
+  .brand{font-size:10px}
+}
+@media(max-width:480px){
+  .kpi-grid,.kpi-grid.cols4{grid-template-columns:1fr}
+  .form-row.c2,.form-row.c3,.form-row.c4{grid-template-columns:1fr}
+  .tax-grid{grid-template-columns:1fr}
+  .brand-text{display:none}
+}
+
+/* ── SCAN LINE EFFECT ── */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);
+}
+
+/* ── STATUS BAR ── */
+#statusbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:90;
+  background:var(--bg2);border-top:1px solid var(--border2);
+  padding:4px 20px;display:flex;gap:20px;align-items:center;
+  font-size:10px;color:var(--text3);letter-spacing:0.08em;
+}
+#statusbar span{display:flex;align-items:center;gap:5px}
+#statusbar .dot{width:4px;height:4px;border-radius:50%}
+body{padding-bottom:30px}
+
+/* ── MILEAGE PREVIEW ── */
+#mi-preview{display:none}
+
+/* ── PROGRESS BAR ── */
+.progress-bar{height:2px;background:var(--border2);border-radius:1px;margin-top:8px;overflow:hidden}
+.progress-fill{height:100%;border-radius:1px;transition:width 0.4s ease;background:var(--lime)}
+
+/* ── NOTES ── */
+.note{
+  font-size:11px;color:var(--text3);line-height:1.7;
+  padding:10px 14px;background:var(--bg3);border-left:2px solid var(--border2);
+  border-radius:0 3px 3px 0;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div class="brand">
+    <div class="brand-dot"></div>
+    <span class="brand-text">FIELD-OPS OS</span>
+    <span style="display:none" id="brand-short">FO</span>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showPanel('dashboard',this)">Dashboard</button>
+    <button class="nav-btn" onclick="showPanel('ledger',this)">Ledger</button>
+    <button class="nav-btn" onclick="showPanel('mileage',this)">Mileage</button>
+    <button class="nav-btn" onclick="showPanel('vault',this)">Receipt Vault</button>
+    <button class="nav-btn" onclick="showPanel('tax',this)">Tax Engine</button>
+    <button class="nav-btn" onclick="showPanel('settings',this)">Settings</button>
+  </nav>
+  <div class="header-right">
+    <button class="btn btn-lime btn-sm" onclick="exportCSV()">Export CSV</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- DASHBOARD -->
+  <div id="p-dashboard" class="panel active">
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi">
+        <div class="kpi-label">Net Profit (YTD)</div>
+        <div class="kpi-val lime" id="kpi-profit">$0.00</div>
+        <div class="kpi-sub">Gross &minus; Expenses &minus; Mileage</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">SE Tax Owed (Est.)</div>
+        <div class="kpi-val amber" id="kpi-tax">$0.00</div>
+        <div class="kpi-sub">Net &times; 92.35% &times; 15.3%</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">YTD Miles</div>
+        <div class="kpi-val neutral" id="kpi-miles">0</div>
+        <div class="kpi-sub" id="kpi-miles-sub">$0.00 deduction</div>
+      </div>
+    </div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi">
+        <div class="kpi-label">Gross Income (Paid)</div>
+        <div class="kpi-val lime" id="kpi-gross">$0.00</div>
+        <div class="kpi-sub" id="kpi-wo-count">0 paid orders</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Total Expenses</div>
+        <div class="kpi-val red" id="kpi-exp">$0.00</div>
+        <div class="kpi-sub" id="kpi-exp-count">0 entries</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Next Qtr. Payment</div>
+        <div class="kpi-val amber" id="kpi-qtr">$0.00</div>
+        <div class="kpi-sub" id="kpi-qtr-label">Estimated</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-hdr">
+        Recent Work Orders
+        <span class="section-hdr-note">Last 5</span>
+      </div>
+      <div class="table-wrap" id="dash-recent">
+        <div class="empty"><div class="empty-icon">&#9632;</div>No work orders logged yet. Go to Ledger to add one.</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-hdr">Recent Mileage Trips <span class="section-hdr-note">Last 5</span></div>
+      <div class="table-wrap" id="dash-miles">
+        <div class="empty"><div class="empty-icon">&#9632;</div>No trips logged yet.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEDGER -->
+  <div id="p-ledger" class="panel">
+    <div class="section">
+      <div class="section-hdr">Add Work Order</div>
+      <div class="section-body">
+        <div class="form-row c4">
+          <div class="form-group">
+            <label>Work Order ID</label>
+            <input type="text" id="wo-id" placeholder="WO-2026-001">
+          </div>
+          <div class="form-group">
+            <label>Platform</label>
+            <select id="wo-platform">
+              <option>WorkMarket</option>
+              <option>Field Nation</option>
+              <option>Upwork</option>
+              <option>Direct Client</option>
+              <option>Subcontract</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Amount ($)</label>
+            <input type="number" id="wo-amount" min="0" step="0.01" placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="wo-date">
+          </div>
+        </div>
+        <div class="form-row c3">
+          <div class="form-group">
+            <label>Status</label>
+            <select id="wo-status">
+              <option>Paid</option>
+              <option>Pending</option>
+              <option>Disputed</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column:span 2">
+            <label>Description / Site</label>
+            <input type="text" id="wo-desc" placeholder="Router install — 123 Main St, Denver CO">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-lime" onclick="addWorkOrder()">+ Add Work Order</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-hdr">
+        Master Ledger
+        <span class="section-hdr-note" id="ledger-count">0 entries</span>
+      </div>
+      <div class="table-wrap" id="ledger-table">
+        <div class="empty"><div class="empty-icon">&#9632;</div>No work orders yet.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-hdr">Log Expense</div>
+      <div class="section-body">
+        <div class="form-row c4">
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="exp-date">
+          </div>
+          <div class="form-group">
+            <label>Vendor / Description</label>
+            <input type="text" id="exp-vendor" placeholder="Home Depot">
+          </div>
+          <div class="form-group">
+            <label>Amount ($)</label>
+            <input type="number" id="exp-amount" min="0" step="0.01" placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="exp-cat">
+              <option>Tools &amp; Equipment</option>
+              <option>Vehicle &amp; Transport</option>
+              <option>Phone &amp; Internet</option>
+              <option>Software &amp; Subscriptions</option>
+              <option>PPE &amp; Safety</option>
+              <option>Office Supplies</option>
+              <option>Training &amp; Certs</option>
+              <option>Materials</option>
+              <option>Fuel</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-amber" onclick="addExpense()">+ Log Expense</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-hdr">
+        Expense Log
+        <span class="section-hdr-note" id="exp-count">0 entries</span>
+      </div>
+      <div class="table-wrap" id="exp-table">
+        <div class="empty"><div class="empty-icon">&#9632;</div>No expenses logged yet.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MILEAGE -->
+  <div id="p-mileage" class="panel">
+    <div class="section">
+      <div class="section-hdr">
+        Log Mileage Trip
+        <span class="section-hdr-note">2026 IRS Rate: $0.725 / mile</span>
+      </div>
+      <div class="section-body">
+        <div class="form-row c4">
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="mi-date">
+          </div>
+          <div class="form-group">
+            <label>Odometer Start (mi)</label>
+            <input type="number" id="mi-start" min="0" step="1" placeholder="55000" oninput="previewMiles()">
+          </div>
+          <div class="form-group">
+            <label>Odometer End (mi)</label>
+            <input type="number" id="mi-end" min="0" step="1" placeholder="55078" oninput="previewMiles()">
+          </div>
+          <div class="form-group">
+            <label>Linked WO ID (opt.)</label>
+            <input type="text" id="mi-wo" placeholder="WO-2026-001">
+          </div>
+        </div>
+        <div class="form-row c2">
+          <div class="form-group">
+            <label>Business Purpose (required by IRS)</label>
+            <input type="text" id="mi-purpose" placeholder="Client site visit — 123 Main St, Denver CO">
+          </div>
+          <div class="form-group">
+            <label>From → To</label>
+            <input type="text" id="mi-route" placeholder="Home → Client Site">
+          </div>
+        </div>
+        <div id="mi-preview" class="alert alert-lime"></div>
+        <div class="btn-row">
+          <button class="btn btn-lime" onclick="addMileage()">+ Log Trip</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-hdr">
+        Mileage Log
+        <span class="section-hdr-note" id="mi-count">0 trips &mdash; 0.0 mi total</span>
+      </div>
+      <div class="table-wrap" id="mi-table">
+        <div class="empty"><div class="empty-icon">&#9632;</div>No trips logged yet.</div>
+      </div>
+    </div>
+
+    <div class="note">
+      IRS Pub 463: Log date, destination, business purpose, and odometer readings for every trip. This log satisfies that requirement. Keep supporting documentation (receipts, work orders) with this export.
+    </div>
+  </div>
+
+  <!-- RECEIPT VAULT -->
+  <div id="p-vault" class="panel">
+    <div class="section">
+      <div class="section-hdr">Receipt Filename Generator</div>
+      <div class="section-body">
+        <div class="form-row c4">
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="rv-date">
+          </div>
+          <div class="form-group">
+            <label>Vendor Name</label>
+            <input type="text" id="rv-vendor" placeholder="Home Depot">
+          </div>
+          <div class="form-group">
+            <label>Amount ($)</label>
+            <input type="number" id="rv-amount" min="0" step="0.01" placeholder="47.82">
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="rv-cat">
+              <option>Tools</option>
+              <option>Equipment</option>
+              <option>Vehicle</option>
+              <option>Phone</option>
+              <option>Internet</option>
+              <option>Software</option>
+              <option>PPE</option>
+              <option>Office</option>
+              <option>Training</option>
+              <option>Fuel</option>
+              <option>Materials</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-lime" onclick="generateFilename()">Generate Filename</button>
+        </div>
+        <div id="rv-output" style="display:none">
+          <div class="vault-output" id="rv-name"></div>
+          <div class="btn-row">
+            <button class="btn btn-lime" onclick="copyFilename()">Copy to Clipboard</button>
+            <button class="btn btn-ghost btn-sm" onclick="logReceiptAsExpense()">Also Log as Expense</button>
+            <span id="rv-copied" style="color:var(--lime);font-size:11px;display:none;align-self:center">&#10003; Copied!</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-hdr">Naming Convention</div>
+      <div class="section-body">
+        <div style="color:var(--text2);font-size:12px;line-height:2">
+          Format: <span style="color:var(--lime)">YYYY-MM-DD_Vendor_Amount_Category.pdf</span><br>
+          Example: <span style="color:var(--amber)">2026-04-15_HomeDepot_47.82_Tools.pdf</span><br>
+          Spaces replaced with underscores. Special characters stripped. Amount formatted to 2 decimal places.<br>
+          Use this filename when scanning / photographing receipts before upload to cloud storage.
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-hdr">Filing Checklist</div>
+      <div class="section-body">
+        <div class="info-row"><span class="info-row-label">Rename receipt file using generator above</span><span style="color:var(--lime)">Step 1</span></div>
+        <div class="info-row"><span class="info-row-label">Upload to cloud folder (Google Drive / Dropbox)</span><span style="color:var(--lime)">Step 2</span></div>
+        <div class="info-row"><span class="info-row-label">Log expense in Ledger tab</span><span style="color:var(--lime)">Step 3</span></div>
+        <div class="info-row"><span class="info-row-label">Export CSV monthly for accountant / tax prep</span><span style="color:var(--lime)">Step 4</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAX ENGINE -->
+  <div id="p-tax" class="panel">
+    <div class="section">
+      <div class="section-hdr">
+        2026 Self-Employment Tax Engine
+        <span class="section-hdr-note">Schedule SE &mdash; IRS Form 1040</span>
+      </div>
+      <div class="section-body">
+        <div class="tax-grid">
+          <div class="tax-card">
+            <div class="tax-card-label">Gross Income (Paid)</div>
+            <div class="tax-card-val" style="color:var(--lime)" id="tx-gross">$0.00</div>
+          </div>
+          <div class="tax-card">
+            <div class="tax-card-label">Total Deductions</div>
+            <div class="tax-card-val" style="color:var(--red)" id="tx-deductions">$0.00</div>
+          </div>
+          <div class="tax-card">
+            <div class="tax-card-label">Net Profit / Loss</div>
+            <div class="tax-card-val" id="tx-net">$0.00</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="tax-grid">
+          <div class="tax-card">
+            <div class="tax-card-label">SE Taxable Base (&#215;92.35%)</div>
+            <div class="tax-card-val" style="color:var(--text)" id="tx-base">$0.00</div>
+          </div>
+          <div class="tax-card">
+            <div class="tax-card-label">SE Tax Liability (&#215;15.3%)</div>
+            <div class="tax-card-val" style="color:var(--amber)" id="tx-se">$0.00</div>
+          </div>
+          <div class="tax-card">
+            <div class="tax-card-label">Effective Rate vs. Gross</div>
+            <div class="tax-card-val" style="color:var(--text2)" id="tx-rate">0.00%</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size:10px;color:var(--amber);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Quarterly Estimated Payments (Form 1040-ES)</div>
+        <div class="tax-grid">
+          <div class="tax-card">
+            <div class="tax-card-label">Q1 &mdash; Due Apr 15, 2026</div>
+            <div class="tax-card-val" style="color:var(--amber);font-size:16px" id="q1">$0.00</div>
+          </div>
+          <div class="tax-card">
+            <div class="tax-card-label">Q2 &mdash; Due Jun 16, 2026</div>
+            <div class="tax-card-val" style="color:var(--amber);font-size:16px" id="q2">$0.00</div>
+          </div>
+          <div class="tax-card">
+            <div class="tax-card-label">Q3 &mdash; Due Sep 15, 2026</div>
+            <div class="tax-card-val" style="color:var(--amber);font-size:16px" id="q3">$0.00</div>
+          </div>
+        </div>
+        <div class="tax-card" style="margin-top:10px;text-align:center">
+          <div class="tax-card-label">Q4 &mdash; Due Jan 15, 2027</div>
+          <div class="tax-card-val" style="color:var(--amber);font-size:16px" id="q4">$0.00</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-hdr">Deduction Breakdown</div>
+      <div class="section-body">
+        <div class="info-row">
+          <span class="info-row-label">Business Expenses</span>
+          <span class="info-row-val" style="color:var(--red)" id="tx-exp-sub">$0.00</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row-label">Mileage Deduction (<span id="tx-mi-count2">0</span> mi &times; $0.725)</span>
+          <span class="info-row-val" style="color:var(--red)" id="tx-mi-sub">$0.00</span>
+        </div>
+        <div class="info-row total">
+          <span class="info-row-label">Total Deductions</span>
+          <span class="info-row-val" style="color:var(--red)" id="tx-total-ded">$0.00</span>
+        </div>
+        <div class="divider"></div>
+        <div class="info-row">
+          <span class="info-row-label">SE Tax Deduction (50% of SE tax &mdash; Schedule 1)</span>
+          <span class="info-row-val" style="color:var(--lime)" id="tx-se-ded">$0.00</span>
+        </div>
+        <div style="margin-top:12px" class="note">
+          SE tax formula: Net Profit &times; 0.9235 &times; 0.153. The 92.35% multiplier accounts for the employer-equivalent deduction. You may deduct 50% of SE tax on Schedule 1, reducing your income tax (not shown here). This tool calculates SE tax only. Federal/state income tax requires a full return. Consult a CPA for your complete liability.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="p-settings" class="panel">
+    <div class="section">
+      <div class="section-hdr">Contractor Profile</div>
+      <div class="section-body">
+        <div class="form-row c2">
+          <div class="form-group">
+            <label>Your Name / Business Name</label>
+            <input type="text" id="set-name" placeholder="John Smith / Smith IT Services LLC" oninput="saveSettings()">
+          </div>
+          <div class="form-group">
+            <label>EIN / SSN Last 4 (for reference)</label>
+            <input type="text" id="set-ein" placeholder="XX-XXXXXXX" oninput="saveSettings()">
+          </div>
+        </div>
+        <div class="form-row c2">
+          <div class="form-group">
+            <label>Primary Platform</label>
+            <select id="set-platform" onchange="saveSettings()">
+              <option>WorkMarket</option>
+              <option>Field Nation</option>
+              <option>Both</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tax Year</label>
+            <select id="set-year" onchange="saveSettings()">
+              <option>2026</option>
+              <option>2025</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-hdr">Data Management</div>
+      <div class="section-body">
+        <div class="btn-row">
+          <button class="btn btn-lime" onclick="exportCSV()">Export Full CSV Backup</button>
+          <button class="btn btn-ghost" onclick="exportJSON()">Export JSON Backup</button>
+          <button class="btn btn-ghost" onclick="importJSON()">Import JSON</button>
+          <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
+        </div>
+        <div class="divider"></div>
+        <div class="note" style="margin-bottom:12px">
+          All data is saved in your browser's localStorage. It persists across sessions on this device. Export CSV monthly as a permanent backup. If you clear browser data, your records will be lost unless you have a JSON backup.
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-red btn-sm" onclick="confirmClear()">Clear All Data</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-hdr">About</div>
+      <div class="section-body">
+        <div class="info-row"><span class="info-row-label">Version</span><span class="info-row-val" style="color:var(--lime)">1.0.0</span></div>
+        <div class="info-row"><span class="info-row-label">IRS Mileage Rate</span><span class="info-row-val">$0.725 / mile (2026)</span></div>
+        <div class="info-row"><span class="info-row-label">SE Tax Formula</span><span class="info-row-val">Net &times; 92.35% &times; 15.3%</span></div>
+        <div class="info-row"><span class="info-row-label">Data Storage</span><span class="info-row-val">localStorage (local device only)</span></div>
+        <div class="info-row"><span class="info-row-label">Built For</span><span class="info-row-val">Independent IT Field Technicians</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- STATUS BAR -->
+<div id="statusbar">
+  <span><div class="dot" style="background:var(--lime)"></div>SYSTEM ONLINE</span>
+  <span id="sb-date"></span>
+  <span>STORAGE: <span id="sb-storage" style="color:var(--lime)">LOCAL</span></span>
+  <span>RATE: $0.725/MI</span>
+  <span style="margin-left:auto" id="sb-name"></span>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div class="modal">
+    <div class="modal-hdr">
+      <span id="modal-title">Confirm</span>
+      <button class="del-btn" onclick="closeModal()" style="font-size:16px">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-msg" id="modal-msg"></div>
+      <div class="modal-actions" id="modal-actions"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ── CONSTANTS ──────────────────────────────────────────────
+const IRS_RATE = 0.725;
+const STORAGE_KEY = 'fieldops_v1';
+
+// ── STATE ──────────────────────────────────────────────────
+let state = {
+  workOrders: [],
+  expenses: [],
+  mileage: [],
+  settings: { name: '', ein: '', platform: 'WorkMarket', year: '2026' }
+};
+
+// ── PERSISTENCE ────────────────────────────────────────────
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch(e) {
+    console.warn('localStorage unavailable:', e);
+  }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const loaded = JSON.parse(raw);
+      state = Object.assign({ workOrders: [], expenses: [], mileage: [], settings: {} }, loaded);
+      state.settings = Object.assign({ name: '', ein: '', platform: 'WorkMarket', year: '2026' }, state.settings);
+    }
+  } catch(e) {
+    console.warn('Failed to load state:', e);
+  }
+}
+
+// ── FORMAT HELPERS ─────────────────────────────────────────
+function fmt(n) {
+  const abs = Math.abs(+n || 0);
+  return '$' + abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtSigned(n) {
+  const v = +n || 0;
+  return (v < 0 ? '-' : '') + fmt(v);
+}
+function fmtMi(n) {
+  return (+n || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+function badgeClass(s) {
+  if (s === 'Paid') return 'badge-paid';
+  if (s === 'Pending') return 'badge-pending';
+  return 'badge-disputed';
+}
+
+// ── CALCULATIONS ───────────────────────────────────────────
+function calcTotals() {
+  const paidOrders = state.workOrders.filter(o => o.status === 'Paid');
+  const gross = paidOrders.reduce((s, o) => s + (+o.amount || 0), 0);
+  const totalExp = state.expenses.reduce((s, e) => s + (+e.amount || 0), 0);
+  const totalMiles = state.mileage.reduce((s, m) => s + (+m.miles || 0), 0);
+  const mileDeduction = totalMiles * IRS_RATE;
+  const netProfit = gross - totalExp - mileDeduction;
+  const seBase = Math.max(0, netProfit) * 0.9235;
+  const seTax = seBase * 0.153;
+  const effectiveRate = gross > 0 ? (seTax / gross) * 100 : 0;
+  const seTaxDeduction = seTax * 0.5;
+  return { gross, totalExp, totalMiles, mileDeduction, netProfit, seBase, seTax, effectiveRate, seTaxDeduction, paidCount: paidOrders.length };
+}
+
+// ── UI UPDATE ──────────────────────────────────────────────
+function updateAll() {
+  const t = calcTotals();
+
+  // KPI Dashboard
+  const profitEl = document.getElementById('kpi-profit');
+  profitEl.textContent = fmtSigned(t.netProfit);
+  profitEl.className = 'kpi-val ' + (t.netProfit >= 0 ? 'lime' : 'red');
+
+  document.getElementById('kpi-tax').textContent = fmt(t.seTax);
+  document.getElementById('kpi-miles').textContent = fmtMi(t.totalMiles);
+  document.getElementById('kpi-miles-sub').textContent = fmt(t.mileDeduction) + ' deduction';
+  document.getElementById('kpi-gross').textContent = fmt(t.gross);
+  document.getElementById('kpi-wo-count').textContent = t.paidCount + ' paid order' + (t.paidCount !== 1 ? 's' : '');
+  document.getElementById('kpi-exp').textContent = fmt(t.totalExp);
+  document.getElementById('kpi-exp-count').textContent = state.expenses.length + ' entr' + (state.expenses.length === 1 ? 'y' : 'ies');
+  document.getElementById('kpi-qtr').textContent = fmt(t.seTax / 4);
+
+  // Tax Panel
+  document.getElementById('tx-gross').textContent = fmt(t.gross);
+  document.getElementById('tx-deductions').textContent = fmt(t.totalExp + t.mileDeduction);
+  const txNet = document.getElementById('tx-net');
+  txNet.textContent = fmtSigned(t.netProfit);
+  txNet.style.color = t.netProfit >= 0 ? 'var(--lime)' : 'var(--red)';
+  document.getElementById('tx-base').textContent = fmt(t.seBase);
+  document.getElementById('tx-se').textContent = fmt(t.seTax);
+  document.getElementById('tx-rate').textContent = t.effectiveRate.toFixed(2) + '%';
+  const qtr = t.seTax / 4;
+  ['q1','q2','q3','q4'].forEach(id => document.getElementById(id).textContent = fmt(qtr));
+  document.getElementById('tx-exp-sub').textContent = fmt(t.totalExp);
+  document.getElementById('tx-mi-count2').textContent = fmtMi(t.totalMiles);
+  document.getElementById('tx-mi-sub').textContent = fmt(t.mileDeduction);
+  document.getElementById('tx-total-ded').textContent = fmt(t.totalExp + t.mileDeduction);
+  document.getElementById('tx-se-ded').textContent = fmt(t.seTaxDeduction);
+
+  // Counts
+  document.getElementById('ledger-count').textContent = state.workOrders.length + ' entries';
+  document.getElementById('exp-count').textContent = state.expenses.length + ' entries';
+  const miCount = state.mileage.reduce((s,m)=>s+(+m.miles||0),0);
+  document.getElementById('mi-count').textContent = state.mileage.length + ' trips \u2014 ' + fmtMi(miCount) + ' mi total';
+
+  renderDashRecent();
+  renderDashMiles();
+  renderLedger();
+  renderExpenses();
+  renderMileage();
+  updateStatusBar();
+  saveState();
+}
+
+// ── RENDERS ────────────────────────────────────────────────
+function renderDashRecent() {
+  const el = document.getElementById('dash-recent');
+  const recent = [...state.workOrders].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+  if (!recent.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">&#9632;</div>No work orders logged yet. Go to Ledger to add one.</div>';
+    return;
+  }
+  el.innerHTML = '<table><thead><tr><th>Date</th><th>WO ID</th><th>Platform</th><th>Amount</th><th>Status</th></tr></thead><tbody>' +
+    recent.map(o => `<tr>
+      <td>${o.date}</td>
+      <td style="color:var(--text2)">${esc(o.id)}</td>
+      <td>${esc(o.platform)}</td>
+      <td class="td-mono" style="color:var(--lime)">${fmt(o.amount)}</td>
+      <td><span class="badge ${badgeClass(o.status)}">${o.status}</span></td>
+    </tr>`).join('') + '</tbody></table>';
+}
+
+function renderDashMiles() {
+  const el = document.getElementById('dash-miles');
+  const recent = [...state.mileage].slice(0, 5);
+  if (!recent.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">&#9632;</div>No trips logged yet.</div>';
+    return;
+  }
+  el.innerHTML = '<table><thead><tr><th>Date</th><th>Miles</th><th>Deduction</th><th>Purpose</th></tr></thead><tbody>' +
+    recent.map(m => `<tr>
+      <td>${m.date}</td>
+      <td class="td-mono">${fmtMi(m.miles)}</td>
+      <td class="td-mono" style="color:var(--lime)">${fmt(m.miles * IRS_RATE)}</td>
+      <td style="color:var(--text2)">${esc(m.purpose)}</td>
+    </tr>`).join('') + '</tbody></table>';
+}
+
+function renderLedger() {
+  const el = document.getElementById('ledger-table');
+  if (!state.workOrders.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">&#9632;</div>No work orders yet.</div>';
+    return;
+  }
+  el.innerHTML = '<table><thead><tr><th>Date</th><th>WO ID</th><th>Platform</th><th>Description</th><th>Amount</th><th>Status</th><th></th></tr></thead><tbody>' +
+    state.workOrders.map((o, i) => `<tr>
+      <td>${o.date}</td>
+      <td style="color:var(--text2)">${esc(o.id)}</td>
+      <td>${esc(o.platform)}</td>
+      <td style="color:var(--text2);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(o.desc || '--')}</td>
+      <td class="td-mono" style="color:var(--lime)">${fmt(o.amount)}</td>
+      <td><span class="badge ${badgeClass(o.status)}">${o.status}</span></td>
+      <td><button class="del-btn" onclick="confirmDel('wo',${i})">&times;</button></td>
+    </tr>`).join('') + '</tbody></table>';
+}
+
+function renderExpenses() {
+  const el = document.getElementById('exp-table');
+  if (!state.expenses.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">&#9632;</div>No expenses logged yet.</div>';
+    return;
+  }
+  el.innerHTML = '<table><thead><tr><th>Date</th><th>Vendor</th><th>Category</th><th>Amount</th><th></th></tr></thead><tbody>' +
+    state.expenses.map((e, i) => `<tr>
+      <td>${e.date}</td>
+      <td>${esc(e.vendor)}</td>
+      <td><span class="badge badge-cat">${esc(e.category)}</span></td>
+      <td class="td-mono" style="color:var(--red)">${fmt(e.amount)}</td>
+      <td><button class="del-btn" onclick="confirmDel('exp',${i})">&times;</button></td>
+    </tr>`).join('') + '</tbody></table>';
+}
+
+function renderMileage() {
+  const el = document.getElementById('mi-table');
+  if (!state.mileage.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">&#9632;</div>No trips logged yet.</div>';
+    return;
+  }
+  el.innerHTML = '<table><thead><tr><th>Date</th><th>Start</th><th>End</th><th>Miles</th><th>Deduction</th><th>Purpose</th><th>Route</th><th>WO</th><th></th></tr></thead><tbody>' +
+    state.mileage.map((m, i) => `<tr>
+      <td>${m.date}</td>
+      <td class="td-mono">${(+m.start).toLocaleString()}</td>
+      <td class="td-mono">${(+m.end).toLocaleString()}</td>
+      <td class="td-mono">${fmtMi(m.miles)}</td>
+      <td class="td-mono" style="color:var(--lime)">${fmt(m.miles * IRS_RATE)}</td>
+      <td style="color:var(--text2);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(m.purpose)}</td>
+      <td style="color:var(--text3)">${esc(m.route || '--')}</td>
+      <td style="color:var(--text3)">${esc(m.wo || '--')}</td>
+      <td><button class="del-btn" onclick="confirmDel('mi',${i})">&times;</button></td>
+    </tr>`).join('') + '</tbody></table>';
+}
+
+// ── ADD ACTIONS ────────────────────────────────────────────
+function addWorkOrder() {
+  const id     = document.getElementById('wo-id').value.trim();
+  const amount = parseFloat(document.getElementById('wo-amount').value);
+  const date   = document.getElementById('wo-date').value;
+  const plat   = document.getElementById('wo-platform').value;
+  const status = document.getElementById('wo-status').value;
+  const desc   = document.getElementById('wo-desc').value.trim();
+
+  if (!id || !date || isNaN(amount) || amount <= 0) {
+    showToast('Fill in WO ID, Date, and a valid Amount.', 'error');
+    return;
+  }
+
+  state.workOrders.unshift({ id, platform: plat, amount, date, status, desc });
+  ['wo-id','wo-amount','wo-desc'].forEach(f => document.getElementById(f).value = '');
+  document.getElementById('wo-date').value = today();
+  showToast('Work order ' + id + ' added.');
+  updateAll();
+}
+
+function addExpense() {
+  const date   = document.getElementById('exp-date').value;
+  const vendor = document.getElementById('exp-vendor').value.trim();
+  const amount = parseFloat(document.getElementById('exp-amount').value);
+  const cat    = document.getElementById('exp-cat').value;
+
+  if (!date || !vendor || isNaN(amount) || amount <= 0) {
+    showToast('Fill in Date, Vendor, and a valid Amount.', 'error');
+    return;
+  }
+
+  state.expenses.unshift({ date, vendor, amount, category: cat });
+  ['exp-vendor','exp-amount'].forEach(f => document.getElementById(f).value = '');
+  document.getElementById('exp-date').value = today();
+  showToast('Expense logged: ' + fmt(amount) + ' at ' + vendor);
+  updateAll();
+}
+
+function addMileage() {
+  const date    = document.getElementById('mi-date').value;
+  const start   = parseFloat(document.getElementById('mi-start').value);
+  const end     = parseFloat(document.getElementById('mi-end').value);
+  const purpose = document.getElementById('mi-purpose').value.trim();
+  const route   = document.getElementById('mi-route').value.trim();
+  const wo      = document.getElementById('mi-wo').value.trim();
+
+  if (!date || isNaN(start) || isNaN(end) || !purpose) {
+    showToast('Date, Odometer readings, and Purpose are required.', 'error');
+    return;
+  }
+  if (end <= start) {
+    showToast('Odometer End must be greater than Start.', 'error');
+    return;
+  }
+
+  const miles = parseFloat((end - start).toFixed(1));
+  state.mileage.unshift({ date, start, end, miles, purpose, route, wo });
+  ['mi-start','mi-end','mi-purpose','mi-route','mi-wo'].forEach(f => document.getElementById(f).value = '');
+  document.getElementById('mi-date').value = today();
+  document.getElementById('mi-preview').style.display = 'none';
+  showToast(fmtMi(miles) + ' mi logged = ' + fmt(miles * IRS_RATE) + ' deduction');
+  updateAll();
+}
+
+// ── MILEAGE PREVIEW ────────────────────────────────────────
+function previewMiles() {
+  const s = parseFloat(document.getElementById('mi-start').value);
+  const e = parseFloat(document.getElementById('mi-end').value);
+  const prev = document.getElementById('mi-preview');
+  if (!isNaN(s) && !isNaN(e) && e > s) {
+    const miles = (e - s).toFixed(1);
+    const ded   = (miles * IRS_RATE).toFixed(2);
+    prev.style.display = 'block';
+    prev.textContent = '\u25b6 ' + miles + ' miles \u00d7 $0.725 = $' + ded + ' deduction';
+  } else {
+    prev.style.display = 'none';
+  }
+}
+
+// ── RECEIPT VAULT ──────────────────────────────────────────
+function generateFilename() {
+  const date   = document.getElementById('rv-date').value;
+  const vendor = document.getElementById('rv-vendor').value.trim();
+  const amount = parseFloat(document.getElementById('rv-amount').value);
+  const cat    = document.getElementById('rv-cat').value;
+
+  if (!date || !vendor || isNaN(amount) || amount < 0) {
+    showToast('Fill in all fields to generate filename.', 'error');
+    return;
+  }
+
+  const cleanVendor = vendor.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+  const cleanAmt    = amount.toFixed(2);
+  const cleanCat    = cat.replace(/\s+/g, '').replace(/[^a-zA-Z0-9&]/g, '').replace('&','');
+  const filename    = date + '_' + cleanVendor + '_' + cleanAmt + '_' + cleanCat + '.pdf';
+
+  document.getElementById('rv-name').textContent = filename;
+  document.getElementById('rv-output').style.display = 'block';
+}
+
+function copyFilename() {
+  const name = document.getElementById('rv-name').textContent;
+  const copied = document.getElementById('rv-copied');
+  const doShow = () => {
+    copied.style.display = 'inline';
+    setTimeout(() => copied.style.display = 'none', 2500);
+    showToast('Filename copied to clipboard.');
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(name).then(doShow).catch(() => fallbackCopy(name, doShow));
+  } else {
+    fallbackCopy(name, doShow);
+  }
+}
+
+function fallbackCopy(text, cb) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); cb(); } catch(e) {}
+  document.body.removeChild(ta);
+}
+
+function logReceiptAsExpense() {
+  const date   = document.getElementById('rv-date').value;
+  const vendor = document.getElementById('rv-vendor').value.trim();
+  const amount = parseFloat(document.getElementById('rv-amount').value);
+  const cat    = document.getElementById('rv-cat').value;
+  if (!date || !vendor || isNaN(amount) || amount <= 0) { showToast('Complete the receipt form first.', 'error'); return; }
+  state.expenses.unshift({ date, vendor, amount, category: cat });
+  showToast('Receipt also logged as expense.');
+  updateAll();
+}
+
+// ── SETTINGS ───────────────────────────────────────────────
+function saveSettings() {
+  state.settings.name     = document.getElementById('set-name').value;
+  state.settings.ein      = document.getElementById('set-ein').value;
+  state.settings.platform = document.getElementById('set-platform').value;
+  state.settings.year     = document.getElementById('set-year').value;
+  saveState();
+  updateStatusBar();
+}
+
+function loadSettingsUI() {
+  document.getElementById('set-name').value     = state.settings.name || '';
+  document.getElementById('set-ein').value      = state.settings.ein || '';
+  document.getElementById('set-platform').value = state.settings.platform || 'WorkMarket';
+  document.getElementById('set-year').value     = state.settings.year || '2026';
+}
+
+// ── STATUS BAR ─────────────────────────────────────────────
+function updateStatusBar() {
+  const d = new Date();
+  document.getElementById('sb-date').textContent =
+    d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' }) +
+    ' ' + d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+  const name = state.settings.name;
+  document.getElementById('sb-name').textContent = name ? '// ' + name : '';
+}
+setInterval(updateStatusBar, 30000);
+
+// ── EXPORT CSV ─────────────────────────────────────────────
+function escCSV(v) {
+  const s = String(v == null ? '' : v);
+  if (s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r')) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+function exportCSV() {
+  const t = calcTotals();
+  const ts = new Date().toISOString();
+  let csv = 'FIELD-OPS CONTRACTOR OS // EXPORT\r\n';
+  csv += 'Generated,' + ts + '\r\n';
+  if (state.settings.name) csv += 'Contractor,' + escCSV(state.settings.name) + '\r\n';
+  csv += 'Tax Year,' + state.settings.year + '\r\n\r\n';
+
+  csv += 'SUMMARY\r\n';
+  csv += 'Gross Income (Paid WOs),' + t.gross.toFixed(2) + '\r\n';
+  csv += 'Total Business Expenses,' + t.totalExp.toFixed(2) + '\r\n';
+  csv += 'Total Miles,' + t.totalMiles.toFixed(1) + '\r\n';
+  csv += 'Mileage Deduction (@ $0.725/mi),' + t.mileDeduction.toFixed(2) + '\r\n';
+  csv += 'Net Profit,' + t.netProfit.toFixed(2) + '\r\n';
+  csv += 'SE Taxable Base (Net x 92.35%),' + t.seBase.toFixed(2) + '\r\n';
+  csv += 'SE Tax Liability (Base x 15.3%),' + t.seTax.toFixed(2) + '\r\n';
+  csv += 'Quarterly Estimated Payment,' + (t.seTax / 4).toFixed(2) + '\r\n\r\n';
+
+  csv += 'WORK ORDERS\r\n';
+  csv += 'Date,WO ID,Platform,Description,Amount,Status\r\n';
+  state.workOrders.forEach(o => {
+    csv += [o.date, o.id, o.platform, o.desc || '', o.amount, o.status].map(escCSV).join(',') + '\r\n';
+  });
+
+  csv += '\r\nEXPENSES\r\n';
+  csv += 'Date,Vendor,Category,Amount\r\n';
+  state.expenses.forEach(e => {
+    csv += [e.date, e.vendor, e.category, e.amount].map(escCSV).join(',') + '\r\n';
+  });
+
+  csv += '\r\nMILEAGE LOG\r\n';
+  csv += 'Date,Odometer Start,Odometer End,Miles,Deduction ($),Purpose,Route,WO ID\r\n';
+  state.mileage.forEach(m => {
+    csv += [m.date, m.start, m.end, m.miles, (m.miles * IRS_RATE).toFixed(2), m.purpose, m.route || '', m.wo || ''].map(escCSV).join(',') + '\r\n';
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'FieldOps_' + (state.settings.name || 'Export').replace(/\s+/g,'_') + '_' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); document.body.removeChild(a); }, 300);
+  showToast('CSV exported.');
+}
+
+// ── EXPORT / IMPORT JSON ───────────────────────────────────
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'FieldOps_Backup_' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); document.body.removeChild(a); }, 300);
+  showToast('JSON backup exported.');
+}
+
+function importJSON() {
+  document.getElementById('import-file').click();
+}
+
+function handleImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = evt => {
+    try {
+      const imported = JSON.parse(evt.target.result);
+      if (!imported.workOrders && !imported.expenses && !imported.mileage) {
+        showToast('Invalid backup file.', 'error');
+        return;
+      }
+      state = Object.assign({ workOrders:[], expenses:[], mileage:[], settings:{} }, imported);
+      state.settings = Object.assign({ name:'', ein:'', platform:'WorkMarket', year:'2026' }, state.settings);
+      saveState();
+      loadSettingsUI();
+      updateAll();
+      showToast('Data imported successfully.');
+    } catch(err) {
+      showToast('Failed to parse JSON file.', 'error');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ── DELETE ─────────────────────────────────────────────────
+let pendingDel = null;
+function confirmDel(type, idx) {
+  pendingDel = { type, idx };
+  let label = '';
+  if (type === 'wo')  label = 'work order "' + (state.workOrders[idx].id) + '"';
+  if (type === 'exp') label = 'expense at "' + (state.expenses[idx].vendor) + '"';
+  if (type === 'mi')  label = 'mileage trip on ' + (state.mileage[idx].date);
+  showModal('Confirm Delete', 'Delete ' + label + '? This cannot be undone.', [
+    { label: 'Cancel', cls: 'btn-ghost', action: closeModal },
+    { label: 'Delete', cls: 'btn-red', action: executeDel }
+  ]);
+}
+
+function executeDel() {
+  if (!pendingDel) return;
+  const { type, idx } = pendingDel;
+  if (type === 'wo')  state.workOrders.splice(idx, 1);
+  if (type === 'exp') state.expenses.splice(idx, 1);
+  if (type === 'mi')  state.mileage.splice(idx, 1);
+  pendingDel = null;
+  closeModal();
+  showToast('Entry deleted.');
+  updateAll();
+}
+
+function confirmClear() {
+  showModal('Clear All Data', 'This will permanently delete ALL work orders, expenses, and mileage records. Export a backup first. This cannot be undone.', [
+    { label: 'Cancel', cls: 'btn-ghost', action: closeModal },
+    { label: 'Delete Everything', cls: 'btn-red', action: () => {
+      state.workOrders = [];
+      state.expenses   = [];
+      state.mileage    = [];
+      closeModal();
+      saveState();
+      updateAll();
+      showToast('All data cleared.');
+    }}
+  ]);
+}
+
+// ── MODAL ──────────────────────────────────────────────────
+function showModal(title, msg, actions) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-msg').textContent   = msg;
+  const ac = document.getElementById('modal-actions');
+  ac.innerHTML = '';
+  actions.forEach(a => {
+    const btn = document.createElement('button');
+    btn.className = 'btn ' + a.cls;
+    btn.textContent = a.label;
+    btn.onclick = a.action;
+    ac.appendChild(btn);
+  });
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('show');
+  pendingDel = null;
+}
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+});
+
+// ── TOAST ──────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = (type === 'error' ? '\u26a0 ' : '\u2713 ') + msg;
+  el.style.borderColor = type === 'error' ? 'var(--red)' : 'var(--lime)';
+  el.style.color       = type === 'error' ? 'var(--red)' : 'var(--lime)';
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ── PANEL NAVIGATION ───────────────────────────────────────
+function showPanel(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('p-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// ── ESCAPE HTML ────────────────────────────────────────────
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── INIT ───────────────────────────────────────────────────
+loadState();
+loadSettingsUI();
+['wo-date','exp-date','mi-date','rv-date'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.value = today();
+});
+updateAll();
+</script>
+</body>
+</html>
