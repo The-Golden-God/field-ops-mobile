@@ -43,6 +43,10 @@ html,body{
 body{padding:20px}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
+.nav-btn,.btn,button{
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
 .shell{max-width:1460px;margin:0 auto}
 .top-actions .btn{min-height:44px}
 .topbar,.brand,.top-actions,.nav-row,.btn-row{display:flex;gap:10px;flex-wrap:wrap}
@@ -299,13 +303,13 @@ tbody tr:hover td{background:#f9fafb} tbody tr:last-child td{border-bottom:none}
   </section>
 
   <div class="nav-row">
-    <button class="nav-btn active" onclick="showPanel('command', this)">Overview</button>
-    <button class="nav-btn" onclick="showPanel('capture', this)">New Job</button>
-    <button class="nav-btn" onclick="showPanel('money', this)">Cash Flow</button>
-    <button class="nav-btn" onclick="showPanel('field', this)">Field Log</button>
-    <button class="nav-btn" onclick="showPanel('tax', this)">Tax View</button>
-    <button class="nav-btn" onclick="showPanel('jobs', this)">Jobs Board</button>
-    <button class="nav-btn" onclick="showPanel('settings', this)">Admin</button>
+    <button class="nav-btn active" data-panel="command">Overview</button>
+    <button class="nav-btn" data-panel="capture">New Job</button>
+    <button class="nav-btn" data-panel="money">Cash Flow</button>
+    <button class="nav-btn" data-panel="field">Field Log</button>
+    <button class="nav-btn" data-panel="tax">Tax View</button>
+    <button class="nav-btn" data-panel="jobs">Jobs Board</button>
+    <button class="nav-btn" data-panel="settings">Admin</button>
   </div>
 
   <main>
@@ -1598,4 +1602,33 @@ function bindEvents() {
   document.getElementById('modal-shell').addEventListener('click', event => {
     if (event.target.id === 'modal-shell') closeModal();
   });
-  windo
+  document.querySelectorAll('.nav-btn').forEach(button => {
+    const handler = event => {
+      event.preventDefault();
+      showPanel(button.dataset.panel, button);
+    };
+    button.addEventListener('click', handler);
+    button.addEventListener('touchend', handler, { passive: false });
+  });
+  window.addEventListener('online', updateConnectivity);
+  window.addEventListener('offline', updateConnectivity);
+}
+
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+initStaticFields();
+loadState();
+ensureConnectors();
+initDefaults();
+resetProjectForm(false);
+bindEvents();
+previewMileage();
+updateAll();
+registerServiceWorker();
+</script>
+</body>
+</html>
