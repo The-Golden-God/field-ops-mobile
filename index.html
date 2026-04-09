@@ -356,7 +356,13 @@ tbody tr:hover td{background:#eef3f7} tbody tr:last-child td{border-bottom:none}
         <div class="stat"><div class="eyebrow">Revenue Collected</div><strong class="t-teal" id="kpi-collected">$0.00</strong><p>Cash already in the bank based on recorded payments.</p></div>
         <div class="stat"><div class="eyebrow">Open Pipeline</div><strong class="t-orange" id="kpi-pipeline">$0.00</strong><p>Open estimate value and work still moving toward the close.</p></div>
         <div class="stat"><div class="eyebrow">Outstanding A/R</div><strong class="t-red" id="kpi-ar">$0.00</strong><p>Invoice balance still waiting on customer payment.</p></div>
-        <div class="stat"><div class="eyebrow">Owner Pay Ready</div><strong class="t-gold" id="kpi-net">$0.00</strong><p>Collected cash minus tracked job costs, expenses, and mileage deduction.</p></div>
+        <div class="stat"><div class="eyebrow">Safe To Touch</div><strong class="t-gold" id="kpi-net">$0.00</strong><p>What is likely safe to move after tracked costs and a tax holdback target.</p></div>
+      </div>
+      <div class="summary-strip" style="margin-top:18px">
+        <div class="summary-box"><span>Cash Collected</span><strong id="cash-collected">$0.00</strong><p>The full amount that has actually hit the business so far.</p></div>
+        <div class="summary-box"><span>Tax Holdback Target</span><strong id="cash-tax-hold">$0.00</strong><p>Set this aside first. This is your estimated reserve, not spending money.</p></div>
+        <div class="summary-box"><span>Safe To Touch</span><strong id="cash-safe-touch">$0.00</strong><p>The simpler ADHD-friendly number: this is the money you can probably use.</p></div>
+        <div class="summary-box"><span>Profit Before Tax</span><strong id="cash-profit-before-tax">$0.00</strong><p>Collected cash minus direct job costs and overhead before tax holdback.</p></div>
       </div>
       <div class="split" style="margin-top:18px">
         <div class="card">
@@ -477,6 +483,12 @@ tbody tr:hover td{background:#eef3f7} tbody tr:last-child td{border-bottom:none}
         <div class="stat"><div class="eyebrow">Tracked Gross Margin</div><strong class="t-teal" id="money-margin">$0.00</strong><p>Collected cash minus direct job costs.</p></div>
       </div>
       <div class="summary-strip" style="margin-top:18px">
+        <div class="summary-box"><span>Cash Collected</span><strong id="money-collected">$0.00</strong><p>Total cash received from customers so far.</p></div>
+        <div class="summary-box"><span>Tax Holdback Target</span><strong id="money-tax-hold">$0.00</strong><p>Keep this parked so tax time hurts less.</p></div>
+        <div class="summary-box"><span>Safe To Touch</span><strong id="money-safe-touch">$0.00</strong><p>Your calmer, more usable spending number after holdback.</p></div>
+        <div class="summary-box"><span>Profit Before Tax</span><strong id="money-profit-before-tax">$0.00</strong><p>Cash in minus direct costs and overhead, before estimated taxes.</p></div>
+      </div>
+      <div class="summary-strip" style="margin-top:12px">
         <div class="summary-box"><span>Deposit Pipeline</span><strong id="money-deposits">$0.00</strong><p>Requested deposits not yet received.</p></div>
         <div class="summary-box"><span>Overdue A/R</span><strong id="money-overdue">$0.00</strong><p>Past-due invoice balances needing follow-up now.</p></div>
         <div class="summary-box"><span>This Month In</span><strong id="money-month-in">$0.00</strong><p>Payments recorded this month.</p></div>
@@ -583,10 +595,12 @@ tbody tr:hover td{background:#eef3f7} tbody tr:last-child td{border-bottom:none}
               <div class="field"><label>Tax Year</label><select id="set-year"></select></div>
               <div class="field"><label>Mileage Rate</label><input type="number" id="set-mile-rate" min="0" step="0.001" placeholder="0.725"></div>
             </div>
-            <div class="form-grid cols-2" style="margin-top:12px">
+            <div class="form-grid cols-3" style="margin-top:12px">
               <div class="field"><label>Target Margin %</label><input type="number" id="set-margin-target" min="0" step="1" placeholder="35"></div>
+              <div class="field"><label>Tax Holdback %</label><input type="number" id="set-tax-holdback" min="0" step="1" placeholder="30"></div>
               <div class="field"><label>Default Payment Terms</label><input type="text" id="set-terms" placeholder="Net 15"></div>
             </div>
+            <div class="footer-note">The tax holdback is a planning buffer, not formal tax advice. Use your accountant's number if you have one.</div>
             <div class="btn-row"><button class="btn btn-primary" onclick="saveSettings()">Save Settings</button></div>
           </div>
         </div>
@@ -634,6 +648,7 @@ const DEFAULT_SETTINGS = {
   taxYear: String(new Date().getFullYear()),
   mileageRate: 0.725,
   marginTarget: 35,
+  taxHoldbackPct: 30,
   paymentTerms: 'Net 15'
 };
 
@@ -752,9 +767,28 @@ function totals() {
   const expenses = state.expenses.reduce((sum, e) => sum + (+e.amount || 0), 0);
   const mileageMiles = state.mileage.reduce((sum, m) => sum + (+m.miles || 0), 0);
   const mileageDeduction = mileageMiles * (+state.settings.mileageRate || 0);
+  const profitBeforeTax = collected - directCosts - expenses;
   const taxableNet = collected - directCosts - expenses - mileageDeduction;
   const seTax = Math.max(0, taxableNet) * 0.9235 * 0.153;
-  return { collected, invoiced, pipeline, outstanding, directCosts, expenses, mileageMiles, mileageDeduction, taxableNet, grossMargin: collected - directCosts, ownerPayReady: taxableNet, seTax };
+  const holdbackTarget = Math.max(0, profitBeforeTax) * ((+state.settings.taxHoldbackPct || 0) / 100);
+  const safeToTouch = Math.max(0, profitBeforeTax - holdbackTarget);
+  return {
+    collected,
+    invoiced,
+    pipeline,
+    outstanding,
+    directCosts,
+    expenses,
+    mileageMiles,
+    mileageDeduction,
+    taxableNet,
+    grossMargin: collected - directCosts,
+    profitBeforeTax,
+    holdbackTarget,
+    safeToTouch,
+    ownerPayReady: safeToTouch,
+    seTax
+  };
 }
 
 function makeActions() {
@@ -894,6 +928,10 @@ function updateDashboard() {
   document.getElementById('kpi-pipeline').textContent = currency(t.pipeline);
   document.getElementById('kpi-ar').textContent = currency(t.outstanding);
   document.getElementById('kpi-net').textContent = currency(t.ownerPayReady);
+  document.getElementById('cash-collected').textContent = currency(t.collected);
+  document.getElementById('cash-tax-hold').textContent = currency(t.holdbackTarget);
+  document.getElementById('cash-safe-touch').textContent = currency(t.safeToTouch);
+  document.getElementById('cash-profit-before-tax').textContent = currency(t.profitBeforeTax);
 
   const actions = makeActions();
   document.getElementById('action-count').textContent = actions.length + ' actions';
@@ -1048,6 +1086,10 @@ function renderMoney() {
   document.getElementById('money-costs').textContent = currency(t.directCosts);
   document.getElementById('money-expenses').textContent = currency(t.expenses);
   document.getElementById('money-margin').textContent = currency(t.grossMargin);
+  document.getElementById('money-collected').textContent = currency(t.collected);
+  document.getElementById('money-tax-hold').textContent = currency(t.holdbackTarget);
+  document.getElementById('money-safe-touch').textContent = currency(t.safeToTouch);
+  document.getElementById('money-profit-before-tax').textContent = currency(t.profitBeforeTax);
   document.getElementById('money-deposits').textContent = currency(openDeposits);
   document.getElementById('money-overdue').textContent = currency(overdue);
   document.getElementById('money-month-in').textContent = currency(monthIn);
@@ -1077,6 +1119,7 @@ function renderSettings() {
   document.getElementById('set-year').value = state.settings.taxYear || DEFAULT_SETTINGS.taxYear;
   document.getElementById('set-mile-rate').value = state.settings.mileageRate;
   document.getElementById('set-margin-target').value = state.settings.marginTarget;
+  document.getElementById('set-tax-holdback').value = state.settings.taxHoldbackPct ?? DEFAULT_SETTINGS.taxHoldbackPct;
   document.getElementById('set-terms').value = state.settings.paymentTerms || '';
   document.getElementById('storage-note').textContent = 'Storage mode: browser localStorage · ' + (state.settings.businessName || 'Unnamed business');
   renderConnectors();
@@ -1427,6 +1470,7 @@ function saveSettings() {
     taxYear: document.getElementById('set-year').value,
     mileageRate: +document.getElementById('set-mile-rate').value || DEFAULT_SETTINGS.mileageRate,
     marginTarget: +document.getElementById('set-margin-target').value || DEFAULT_SETTINGS.marginTarget,
+    taxHoldbackPct: +document.getElementById('set-tax-holdback').value || DEFAULT_SETTINGS.taxHoldbackPct,
     paymentTerms: document.getElementById('set-terms').value.trim() || DEFAULT_SETTINGS.paymentTerms
   };
   queueSync('update', 'settings', 'business-profile');
@@ -1620,6 +1664,8 @@ function exportCSV() {
   csv += 'Tax Year,' + csvEscape(state.settings.taxYear) + '\r\n\r\n';
   csv += 'SUMMARY\r\n';
   csv += 'Revenue Collected,' + t.collected.toFixed(2) + '\r\n';
+  csv += 'Tax Holdback Target,' + t.holdbackTarget.toFixed(2) + '\r\n';
+  csv += 'Safe To Touch,' + t.safeToTouch.toFixed(2) + '\r\n';
   csv += 'Open Pipeline,' + t.pipeline.toFixed(2) + '\r\n';
   csv += 'Outstanding AR,' + t.outstanding.toFixed(2) + '\r\n';
   csv += 'Direct Job Costs,' + t.directCosts.toFixed(2) + '\r\n';
@@ -1688,7 +1734,7 @@ function loadDemoData() {
       { id: uid('mi'), date: year + '-04-03', start: 55201.4, end: 55249.9, miles: 48.5, projectId: '', purpose: 'Clinic switch refresh and validation', route: 'Home → Clinic → Supply run → Home' },
       { id: uid('mi'), date: year + '-04-04', start: 55249.9, end: 55284.2, miles: 34.3, projectId: '', purpose: 'Site walk and quote follow-up', route: 'Office → Warehouse → Office' }
     ],
-    settings: { businessName:'Field Ops Example Co.', owner:'Jordan Rivers', primaryTrade:'Network / Low Voltage', taxYear:String(year), mileageRate:0.725, marginTarget:35, paymentTerms:'Net 15' },
+    settings: { businessName:'Field Ops Example Co.', owner:'Jordan Rivers', primaryTrade:'Network / Low Voltage', taxYear:String(year), mileageRate:0.725, marginTarget:35, taxHoldbackPct:30, paymentTerms:'Net 15' },
     connectors: [],
     syncQueue: [],
     meta: { lastLocalSave: '', installMode: 'file' }
