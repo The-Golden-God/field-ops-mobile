@@ -3,1451 +3,1617 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Field-Ops Contractor OS</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#243647">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Contractor OS">
+<title>Contractor Command OS</title>
+<link rel="manifest" href="./manifest.webmanifest">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0a0a0a;
-  --bg2:#111111;
-  --bg3:#181818;
-  --bg4:#222222;
-  --lime:#00FF41;
-  --lime-dim:#00cc33;
-  --amber:#FFB100;
-  --amber-dim:#cc8e00;
-  --red:#FF4444;
-  --red-dim:#cc3333;
-  --text:#d4d4d4;
-  --text2:#777;
-  --text3:#444;
-  --border:#1e1e1e;
-  --border2:#2a2a2a;
-  --font:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --bg:#e6eaee;
+  --bg-soft:#f3f5f7;
+  --panel:#ffffff;
+  --ink:#111827;
+  --ink-soft:#4b5563;
+  --ink-faint:#6b7280;
+  --line:#d1d5db;
+  --line-strong:#9ca3af;
+  --teal:#0f766e;
+  --teal-soft:#d9f3ef;
+  --orange:#d97706;
+  --orange-soft:#ffedd5;
+  --red:#b91c1c;
+  --red-soft:#fee2e2;
+  --gold:#a16207;
+  --gold-soft:#fef3c7;
+  --shadow:0 10px 30px rgba(17,24,39,.08);
+  --display:"Aptos Display","Trebuchet MS","Segoe UI",sans-serif;
+  --ui:"Aptos","Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono","Consolas","Courier New",monospace;
 }
-html,body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;min-height:100vh;-webkit-font-smoothing:antialiased}
-
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:var(--bg2)}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:var(--text3)}
-
-/* ── HEADER ── */
-#header{
-  position:sticky;top:0;z-index:100;
-  background:var(--bg2);
-  border-bottom:1px solid var(--border2);
-  display:flex;align-items:center;
-  padding:0 20px;
-  height:48px;
-  gap:0;
+html,body{
+  min-height:100%;
+  background:#e8edf1;
+  color:var(--ink);
+  font-family:var(--ui);
+  -webkit-font-smoothing:antialiased;
 }
-.brand{
-  font-size:11px;font-weight:700;letter-spacing:0.15em;
-  color:var(--lime);text-transform:uppercase;
-  padding-right:20px;border-right:1px solid var(--border2);
-  margin-right:4px;white-space:nowrap;
-  display:flex;align-items:center;gap:8px;
+body{padding:20px}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.shell{max-width:1460px;margin:0 auto}
+.top-actions .btn{min-height:44px}
+.topbar,.brand,.top-actions,.nav-row,.btn-row{display:flex;gap:10px;flex-wrap:wrap}
+.topbar{align-items:center;justify-content:space-between;margin-bottom:18px}
+.status-strip{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  margin-bottom:14px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;
+  background:#f8fafc;box-shadow:none
 }
-.brand-dot{
-  width:6px;height:6px;border-radius:50%;
-  background:var(--lime);
-  box-shadow:0 0 6px var(--lime);
-  animation:pulse 2s ease-in-out infinite;
+.status-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.status-dot{width:10px;height:10px;border-radius:50%;background:var(--teal)}
+.status-dot.offline{background:var(--orange)}
+.status-chip{
+  display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;
+  border:1px solid var(--line);background:#fff;font:700 .74rem/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)
 }
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
-.nav{display:flex;gap:0;overflow-x:auto;flex:1}
-.nav::-webkit-scrollbar{height:0}
+.status-chip.warn{background:var(--orange-soft);color:var(--orange);border-color:#efcfbb}
+.status-chip.ok{background:var(--teal-soft);color:var(--teal);border-color:#c7e4e7}
+.status-chip.muted{background:#edf2f6}
+.brand{align-items:center;gap:14px}
+.brand-mark{
+  width:46px;height:46px;border-radius:12px;background:#d97706;
+  color:#fff;display:grid;place-items:center;font:700 18px/1 var(--display)
+}
+.brand-copy h1{font:700 clamp(1.4rem,2.4vw,2rem)/1 var(--display);letter-spacing:-.03em}
+.brand-copy p{margin-top:4px;color:var(--ink-soft);font-size:.96rem}
+.hero{
+  position:relative;overflow:hidden;background:#1f2937;
+  color:#f9fafb;border-radius:18px;box-shadow:none;padding:20px 22px;margin-bottom:14px;border:1px solid #111827
+}
+.hero::after{
+  content:"";position:absolute;inset:0 auto 0 0;width:6px;height:100%;background:#d97706
+}
+.hero-grid,.split,.three,.stats-grid,.board,.project-cards,.project-metrics,.form-grid{
+  display:grid;gap:18px
+}
+.quad{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.hero-grid{grid-template-columns:1.5fr .7fr;align-items:start}
+.hero-copy h2{font:700 clamp(1.6rem,3.2vw,2.35rem)/1 var(--display);letter-spacing:-.035em;max-width:760px}
+.hero-copy p{margin-top:10px;color:#d1d5db;max-width:680px;line-height:1.55;font-size:.97rem}
+.hero-pill-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.hero-pill{
+  padding:7px 11px;border:1px solid #374151;background:#273244;border-radius:999px;
+  color:#f3f4f6;font-size:.82rem
+}
+.hero-card{
+  position:relative;z-index:1;background:#273244;border:1px solid #374151;
+  border-radius:16px;padding:16px
+}
+.hero-card h3,.eyebrow{
+  font:700 .8rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase
+}
+.hero-card h3{color:#fbbf24;margin-bottom:14px}
+.eyebrow{color:var(--ink-faint)}
+.hero-checklist,.action-list,.today-list,.aging-list,.mini-list,.intel-list{display:grid;gap:12px}
+.hero-check{display:flex;gap:10px;align-items:flex-start}
+.hero-check span:first-child{
+  width:24px;height:24px;border-radius:50%;background:#2c6b63;color:#d8fbf7;display:grid;place-items:center;font-size:.8rem;flex:none
+}
+.hero-check strong,.action-item strong,.today-item strong,.aging-item strong,.mini-item strong,.intel-item strong,.stage-card strong{
+  display:block;margin-bottom:4px
+}
 .nav-btn{
-  padding:0 18px;height:48px;border:none;background:transparent;
-  color:var(--text2);cursor:pointer;font-family:var(--font);
-  font-size:11px;letter-spacing:0.08em;text-transform:uppercase;
-  border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;
-  white-space:nowrap;
+  border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:#f8fafc;color:var(--ink-soft);
+  box-shadow:none;transition:transform .15s ease, background .15s ease, color .15s ease, border-color .15s ease
 }
-.nav-btn:hover{color:var(--text)}
-.nav-btn.active{color:var(--lime);border-bottom-color:var(--lime)}
-.header-right{display:flex;gap:8px;margin-left:auto;padding-left:16px;border-left:1px solid var(--border2)}
-
-/* ── MAIN ── */
-#main{max-width:1200px;margin:0 auto;padding:20px}
-
-/* ── PANELS ── */
-.panel{display:none;animation:fadeIn 0.15s ease}
+.nav-btn:hover,.btn:hover{transform:translateY(-1px)}
+.nav-btn.active{background:#111827;color:#f9fafb;border-color:#111827}
+.panel{display:none}
 .panel.active{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-
-/* ── KPI GRID ── */
-.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
-.kpi-grid.cols4{grid-template-columns:repeat(4,1fr)}
-.kpi{
-  background:var(--bg2);border:1px solid var(--border2);
-  padding:16px;border-radius:4px;position:relative;overflow:hidden;
+.stats-grid{grid-template-columns:repeat(4,1fr);gap:12px}
+.stat,.card{
+  background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:none
 }
-.kpi::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--border2),transparent);
+.stat{padding:18px}
+.stat{border-top:4px solid #e5e7eb}
+.stats-grid .stat:nth-child(1){border-top-color:var(--teal)}
+.stats-grid .stat:nth-child(2){border-top-color:var(--orange)}
+.stats-grid .stat:nth-child(3){border-top-color:var(--red)}
+.stats-grid .stat:nth-child(4){border-top-color:var(--gold)}
+.stat strong{display:block;margin-top:10px;font:700 clamp(1.6rem,3vw,2.35rem)/1 var(--display);letter-spacing:-.04em}
+.stat p,.card-head p,.meta,.footer-note{color:var(--ink-soft);line-height:1.5}
+.t-teal{color:var(--teal)} .t-orange{color:var(--orange)} .t-red{color:var(--red)} .t-gold{color:var(--gold)}
+.split{grid-template-columns:1.18fr .82fr}
+.three{grid-template-columns:repeat(3,1fr)}
+.card{overflow:hidden}
+.card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 20px 0}
+.card-head h3{font:700 1.06rem/1.1 var(--display);letter-spacing:-.02em}
+.card-body{padding:18px 20px 20px}
+.card-head p{max-width:58ch}
+.action-item,.today-item,.aging-item,.mini-item,.intel-item,.project-card,.stage-col,.mini-metric,.empty{
+  border:1px solid var(--line);background:var(--bg-soft);border-radius:12px
 }
-.kpi-label{font-size:10px;color:var(--text2);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px}
-.kpi-val{font-size:24px;font-weight:700;letter-spacing:-0.02em;line-height:1}
-.kpi-val.lime{color:var(--lime)}
-.kpi-val.amber{color:var(--amber)}
-.kpi-val.red{color:var(--red)}
-.kpi-val.neutral{color:var(--text)}
-.kpi-sub{font-size:10px;color:var(--text3);margin-top:6px}
-
-/* ── SECTION ── */
-.section{
-  background:var(--bg2);border:1px solid var(--border2);
-  border-radius:4px;margin-bottom:12px;overflow:hidden;
+.action-item,.today-item,.aging-item,.mini-item,.intel-item,.project-card,.empty{padding:14px 15px}
+.action-item{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px}
+.flag{width:12px;height:12px;border-radius:50%}
+.flag.red{background:var(--red)} .flag.orange{background:var(--orange)} .flag.teal{background:var(--teal)} .flag.gold{background:var(--gold)}
+.num{font-family:var(--mono);white-space:nowrap}
+.board{grid-template-columns:repeat(6,1fr);gap:10px}
+.stage-col{padding:14px;min-height:220px}
+.stage-col h4{display:flex;justify-content:space-between;align-items:center;gap:8px;font:700 .92rem/1 var(--display);margin-bottom:14px}
+.stage-count{
+  min-width:26px;height:26px;border-radius:999px;padding:0 8px;display:grid;place-items:center;background:var(--panel);
+  border:1px solid var(--line);color:var(--ink-soft);font:700 .78rem/1 var(--mono)
 }
-.section-hdr{
-  padding:10px 16px;background:var(--bg3);
-  border-bottom:1px solid var(--border2);
-  font-size:10px;color:var(--amber);letter-spacing:0.12em;
-  text-transform:uppercase;display:flex;justify-content:space-between;
-  align-items:center;gap:8px;
+.stage-stack{display:grid;gap:10px}
+.stage-card{padding:12px;border-radius:16px;background:var(--panel);border:1px solid rgba(190,169,139,.6)}
+.stage-card p{color:var(--ink-soft);line-height:1.45;font-size:.92rem}
+.cols-2{grid-template-columns:repeat(2,1fr)} .cols-3{grid-template-columns:repeat(3,1fr)} .cols-4{grid-template-columns:repeat(4,1fr)}
+.field{display:grid;gap:6px}
+.field label{font:700 .78rem/1 var(--mono);color:var(--ink-faint);text-transform:uppercase;letter-spacing:.08em}
+input[type=text],input[type=number],input[type=date],select,textarea{
+  width:100%;min-width:0;border:1px solid var(--line);border-radius:16px;padding:12px 14px;background:#fffefb;color:var(--ink);
+  outline:none;transition:border-color .15s ease, box-shadow .15s ease
 }
-.section-hdr-note{color:var(--text3);font-size:10px;letter-spacing:0.05em;text-transform:none}
-.section-body{padding:16px}
-
-/* ── FORMS ── */
-.form-row{display:grid;gap:10px;margin-bottom:10px}
-.form-row.c2{grid-template-columns:1fr 1fr}
-.form-row.c3{grid-template-columns:1fr 1fr 1fr}
-.form-row.c4{grid-template-columns:1fr 1fr 1fr 1fr}
-.form-group{}
-label{
-  font-size:10px;color:var(--text2);letter-spacing:0.1em;
-  text-transform:uppercase;display:block;margin-bottom:5px;
-}
-input[type=text],input[type=number],input[type=date],input[type=email],select,textarea{
-  width:100%;background:var(--bg3);border:1px solid var(--border2);
-  color:var(--text);padding:8px 10px;font-family:var(--font);font-size:12px;
-  border-radius:3px;outline:none;transition:border-color 0.15s;
-  -webkit-appearance:none;appearance:none;
-}
-input:focus,select:focus,textarea:focus{border-color:var(--lime)}
-input::placeholder{color:var(--text3)}
-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23555'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;cursor:pointer}
-select option{background:var(--bg3);color:var(--text)}
-
-/* ── BUTTONS ── */
+textarea{resize:vertical;min-height:88px}
+input:focus,select:focus,textarea:focus{border-color:var(--line-strong);box-shadow:0 0 0 4px rgba(201,107,40,.12)}
 .btn{
-  padding:8px 18px;border:1px solid;border-radius:3px;cursor:pointer;
-  font-family:var(--font);font-size:11px;letter-spacing:0.1em;
-  text-transform:uppercase;transition:all 0.15s;white-space:nowrap;
-  display:inline-flex;align-items:center;gap:6px;
+  border:none;border-radius:16px;padding:12px 16px;font-weight:700;letter-spacing:.01em;
+  transition:transform .15s ease, background .15s ease, color .15s ease
 }
-.btn:active{transform:scale(0.97)}
-.btn-lime{background:transparent;border-color:var(--lime);color:var(--lime)}
-.btn-lime:hover{background:var(--lime);color:#000}
-.btn-amber{background:transparent;border-color:var(--amber);color:var(--amber)}
-.btn-amber:hover{background:var(--amber);color:#000}
-.btn-red{background:transparent;border-color:var(--red);color:var(--red)}
-.btn-red:hover{background:var(--red);color:#fff}
-.btn-ghost{background:transparent;border-color:var(--border2);color:var(--text2)}
-.btn-ghost:hover{border-color:var(--text2);color:var(--text)}
-.btn-sm{padding:5px 12px;font-size:10px}
-.btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center}
-
-/* ── TABLES ── */
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:600px}
-th{
-  font-size:10px;color:var(--text2);text-align:left;
-  padding:8px 12px;border-bottom:1px solid var(--border2);
-  letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;
-  background:var(--bg3);
+.btn,.nav-btn,input,select,textarea{font-size:16px}
+.btn-primary{background:#111827;color:#f5f9fb}
+.btn-secondary{background:var(--orange-soft);color:var(--orange)}
+.btn-muted{background:#edf2f6;color:var(--ink-soft)}
+.btn-danger{background:var(--red-soft);color:var(--red)}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink-soft)}
+.pill{
+  display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 11px;font:700 .76rem/1 var(--mono);
+  letter-spacing:.06em;text-transform:uppercase
 }
-td{
-  padding:9px 12px;border-bottom:1px solid var(--border);
-  font-size:12px;color:var(--text);vertical-align:middle;
+.pill.inquiry{background:#e5e7eb;color:#4b5563} .pill.estimate{background:#e9f0fc;color:#365f9c}
+.pill.deposit{background:var(--gold-soft);color:var(--gold)} .pill.scheduled{background:#dbeafe;color:#1d4ed8}
+.pill.active{background:var(--teal-soft);color:var(--teal)} .pill.payment{background:var(--orange-soft);color:var(--orange)}
+.pill.paid{background:#dff1e5;color:#277a45} .pill.priority-high{background:var(--red-soft);color:var(--red)}
+.pill.priority-medium{background:var(--orange-soft);color:var(--orange)} .pill.priority-low{background:#e8f1ee;color:#47685e}
+.table-wrap{width:100%;overflow:auto;border:1px solid var(--line);border-radius:14px}
+table{width:100%;border-collapse:collapse;min-width:900px;background:#fff}
+th,td{text-align:left;padding:14px;border-bottom:1px solid #eadfcc;vertical-align:top}
+th{background:#f3f4f6;color:var(--ink-faint);font:700 .78rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em}
+tbody tr:hover td{background:#f9fafb} tbody tr:last-child td{border-bottom:none}
+.stack{display:grid;gap:4px} .muted{color:var(--ink-soft)} .fine{color:var(--ink-faint);font-size:.9rem}
+.project-cards{grid-template-columns:repeat(2,1fr);gap:14px}
+.project-card{padding:18px;display:grid;gap:12px}
+.project-head{display:flex;justify-content:space-between;gap:12px}
+.project-metrics{grid-template-columns:repeat(3,1fr);gap:10px}
+.connector-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.connector-card{
+  border:1px solid var(--line);border-radius:14px;background:#fff;padding:16px;display:grid;gap:12px
 }
-tbody tr:last-child td{border-bottom:none}
-tbody tr:hover td{background:var(--bg3)}
-.td-mono{font-variant-numeric:tabular-nums}
-
-/* ── BADGES ── */
-.badge{
-  padding:2px 8px;border-radius:2px;font-size:10px;
-  letter-spacing:0.06em;text-transform:uppercase;white-space:nowrap;
-  display:inline-block;
+.connector-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.connector-meta{display:grid;gap:4px}
+.connector-actions{display:flex;gap:8px;flex-wrap:wrap}
+.connector-note{
+  border:1px solid var(--line);border-radius:12px;background:var(--bg-soft);padding:12px;color:var(--ink-soft);line-height:1.5
 }
-.badge-paid{background:#051a05;color:var(--lime);border:1px solid #0d3a0d}
-.badge-pending{background:#1a1000;color:var(--amber);border:1px solid #3a2500}
-.badge-disputed{background:#1a0505;color:var(--red);border:1px solid #3a0f0f}
-.badge-cat{background:var(--bg3);color:var(--text2);border:1px solid var(--border2)}
-
-/* ── ALERTS ── */
-.alert{
-  padding:10px 14px;border-radius:3px;font-size:12px;
-  margin-bottom:12px;border-left:3px solid;
+.lane-card{padding:16px}
+.lane-card h4{font:700 .98rem/1.1 var(--display);margin-bottom:10px}
+.lane-list{display:grid;gap:10px}
+.lane-item{padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.lane-item strong{display:block;margin-bottom:4px}
+.lane-item .fine{margin-top:4px}
+.mini-metric{padding:12px;background:#fffefb}
+.mini-metric span{display:block;color:var(--ink-faint);font:700 .72rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em}
+.mini-metric strong{display:block;margin-top:8px;font:700 1.1rem/1 var(--display)}
+.empty{padding:20px;background:rgba(255,255,255,.45);line-height:1.55}
+.toast{
+  position:fixed;right:18px;bottom:18px;max-width:360px;background:#111827;color:#f0f7f6;padding:14px 16px;border-radius:14px;
+  box-shadow:var(--shadow);opacity:0;transform:translateY(12px);pointer-events:none;transition:opacity .2s ease, transform .2s ease;z-index:30
 }
-.alert-lime{background:#051a05;color:var(--lime);border-color:var(--lime)}
-.alert-amber{background:#1a1000;color:var(--amber);border-color:var(--amber)}
-.alert-red{background:#1a0505;color:var(--red);border-color:var(--red)}
-.alert:empty{display:none}
-
-/* ── EMPTY STATE ── */
-.empty{
-  text-align:center;padding:48px 24px;color:var(--text3);
-  font-size:12px;letter-spacing:0.05em;
+.toast.show{opacity:1;transform:translateY(0)} .toast.error{background:#7b3040}
+.modal-shell{
+  position:fixed;inset:0;background:rgba(31,41,51,.4);display:none;align-items:center;justify-content:center;padding:20px;z-index:40
 }
-.empty-icon{font-size:24px;margin-bottom:12px;opacity:0.3}
-
-/* ── DELETE BTN ── */
-.del-btn{
-  background:transparent;border:none;color:var(--text3);
-  cursor:pointer;font-size:13px;padding:2px 6px;border-radius:2px;
-  transition:all 0.1s;
-}
-.del-btn:hover{color:var(--red);background:#1a0505}
-
-/* ── TAX PANEL ── */
-.tax-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
-.tax-card{
-  background:var(--bg3);border:1px solid var(--border2);
-  padding:14px;border-radius:3px;text-align:center;
-}
-.tax-card-label{font-size:10px;color:var(--text2);margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase}
-.tax-card-val{font-size:18px;font-weight:700;letter-spacing:-0.01em}
-.divider{height:1px;background:var(--border2);margin:14px 0}
-.info-row{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:5px 0;font-size:12px;border-bottom:1px solid var(--border);
-}
-.info-row:last-child{border-bottom:none}
-.info-row-label{color:var(--text2)}
-.info-row-val{font-variant-numeric:tabular-nums;font-weight:500}
-.info-row.total{padding-top:10px;font-weight:700}
-
-/* ── VAULT OUTPUT ── */
-.vault-output{
-  background:var(--bg3);border:1px solid var(--lime);
-  padding:14px 16px;border-radius:3px;
-  font-size:13px;color:var(--lime);letter-spacing:0.04em;
-  word-break:break-all;line-height:1.6;margin-top:12px;
-}
-
-/* ── TOAST ── */
-#toast{
-  position:fixed;bottom:24px;right:24px;z-index:9999;
-  background:var(--bg3);border:1px solid var(--lime);
-  color:var(--lime);padding:10px 18px;border-radius:3px;
-  font-size:12px;letter-spacing:0.08em;
-  transform:translateY(80px);opacity:0;
-  transition:all 0.25s ease;pointer-events:none;
-}
-#toast.show{transform:translateY(0);opacity:1}
-
-/* ── MODAL ── */
-#modal-overlay{
-  display:none;position:fixed;inset:0;z-index:500;
-  background:rgba(0,0,0,0.85);align-items:center;justify-content:center;
-}
-#modal-overlay.show{display:flex}
+.modal-shell.show{display:flex}
 .modal{
-  background:var(--bg2);border:1px solid var(--border2);
-  border-radius:4px;width:90%;max-width:420px;overflow:hidden;
+  width:min(520px,100%);background:var(--panel);border-radius:24px;border:1px solid var(--line);box-shadow:var(--shadow);padding:22px
 }
-.modal-hdr{
-  padding:14px 18px;background:var(--bg3);border-bottom:1px solid var(--border2);
-  font-size:11px;color:var(--amber);letter-spacing:0.1em;text-transform:uppercase;
-  display:flex;justify-content:space-between;align-items:center;
-}
-.modal-body{padding:18px}
-.modal-msg{font-size:13px;color:var(--text);line-height:1.6;margin-bottom:16px}
-.modal-actions{display:flex;gap:8px;justify-content:flex-end}
-
-/* ── RESPONSIVE ── */
-@media(max-width:768px){
-  #main{padding:12px}
-  .kpi-grid,.kpi-grid.cols4{grid-template-columns:1fr 1fr}
-  .form-row.c3,.form-row.c4{grid-template-columns:1fr 1fr}
-  .tax-grid{grid-template-columns:1fr 1fr}
-  .kpi-val{font-size:18px}
-  .nav-btn{padding:0 12px;font-size:10px}
-  .brand{font-size:10px}
-}
-@media(max-width:480px){
-  .kpi-grid,.kpi-grid.cols4{grid-template-columns:1fr}
-  .form-row.c2,.form-row.c3,.form-row.c4{grid-template-columns:1fr}
-  .tax-grid{grid-template-columns:1fr}
-  .brand-text{display:none}
-}
-
-/* ── SCAN LINE EFFECT ── */
-body::after{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);
-}
-
-/* ── STATUS BAR ── */
-#statusbar{
-  position:fixed;bottom:0;left:0;right:0;z-index:90;
-  background:var(--bg2);border-top:1px solid var(--border2);
-  padding:4px 20px;display:flex;gap:20px;align-items:center;
-  font-size:10px;color:var(--text3);letter-spacing:0.08em;
-}
-#statusbar span{display:flex;align-items:center;gap:5px}
-#statusbar .dot{width:4px;height:4px;border-radius:50%}
-body{padding-bottom:30px}
-
-/* ── MILEAGE PREVIEW ── */
-#mi-preview{display:none}
-
-/* ── PROGRESS BAR ── */
-.progress-bar{height:2px;background:var(--border2);border-radius:1px;margin-top:8px;overflow:hidden}
-.progress-fill{height:100%;border-radius:1px;transition:width 0.4s ease;background:var(--lime)}
-
-/* ── NOTES ── */
-.note{
-  font-size:11px;color:var(--text3);line-height:1.7;
-  padding:10px 14px;background:var(--bg3);border-left:2px solid var(--border2);
-  border-radius:0 3px 3px 0;
+.modal h3{font:700 1.22rem/1.1 var(--display);margin-bottom:10px}
+.footer-note{margin-top:16px;font-size:.92rem}
+@media (max-width:1240px){.stats-grid,.quad{grid-template-columns:repeat(2,1fr)}.split,.hero-grid,.three{grid-template-columns:1fr}.board{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:920px){body{padding:16px}.cols-4,.cols-3,.cols-2,.project-cards,.project-metrics,.quad,.connector-grid{grid-template-columns:1fr}.board{grid-template-columns:repeat(2,1fr)}.action-item{grid-template-columns:auto 1fr}.action-item .num{grid-column:2}}
+@media (max-width:640px){
+  body{padding:12px}
+  .topbar{align-items:flex-start;flex-direction:column}
+  .top-actions{width:100%}
+  .top-actions .btn{flex:1 1 100%}
+  .nav-row{
+    overflow:auto;flex-wrap:nowrap;padding-bottom:8px;position:sticky;top:0;z-index:10;
+    background:#e8edf1;margin:0 -12px 12px;padding:0 12px 8px
+  }
+  .nav-btn{white-space:nowrap}
+  .stats-grid,.board{grid-template-columns:1fr}
+  .hero{padding:18px}
+  .status-strip{align-items:flex-start}
+  .card-head{padding:16px 16px 0}
+  .card-body{padding:16px}
+  .table-wrap{border-radius:12px}
+  table{min-width:760px}
 }
 </style>
 </head>
 <body>
+<div class="shell">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">CO</div>
+      <div class="brand-copy">
+        <h1>Contractor Command OS</h1>
+        <p>Field-ready job tracking for solo contractors and small crews.</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="btn btn-secondary" onclick="loadDemoData()">Try Sample Data</button>
+      <button class="btn btn-muted" onclick="exportCSV()">Export CSV</button>
+      <button class="btn btn-primary" onclick="showPanel('jobs', this)">Open Jobs Board</button>
+    </div>
+  </div>
 
-<!-- HEADER -->
-<div id="header">
-  <div class="brand">
-    <div class="brand-dot"></div>
-    <span class="brand-text">FIELD-OPS OS</span>
-    <span style="display:none" id="brand-short">FO</span>
+  <div class="status-strip">
+    <div class="status-row">
+      <span class="status-dot" id="net-dot"></span>
+      <strong id="net-label">Offline-ready local app</strong>
+      <span class="meta" id="net-copy">Works without service. Changes save on this device immediately.</span>
+    </div>
+    <div class="status-row">
+      <span class="status-chip muted" id="sync-chip">Sync target not connected</span>
+      <span class="status-chip ok" id="save-chip">Saved locally</span>
+      <span class="status-chip muted" id="queue-chip">0 pending sync changes</span>
+    </div>
   </div>
-  <nav class="nav">
-    <button class="nav-btn active" onclick="showPanel('dashboard',this)">Dashboard</button>
-    <button class="nav-btn" onclick="showPanel('ledger',this)">Ledger</button>
-    <button class="nav-btn" onclick="showPanel('mileage',this)">Mileage</button>
-    <button class="nav-btn" onclick="showPanel('vault',this)">Receipt Vault</button>
-    <button class="nav-btn" onclick="showPanel('tax',this)">Tax Engine</button>
-    <button class="nav-btn" onclick="showPanel('settings',this)">Settings</button>
-  </nav>
-  <div class="header-right">
-    <button class="btn btn-lime btn-sm" onclick="exportCSV()">Export CSV</button>
+
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <div class="eyebrow" style="color:#fbbf24">Contractor workflow</div>
+        <h2>Keep jobs moving, cash visible, and the back office under control.</h2>
+        <p>A contractor workspace built around the flow that matters most: quote, schedule, deliver, invoice, collect, and stay ready for taxes.</p>
+        <div class="hero-pill-row">
+          <div class="hero-pill">Jobs board</div>
+          <div class="hero-pill">Cash flow</div>
+          <div class="hero-pill">Field logs</div>
+        </div>
+      </div>
+      <div class="hero-card">
+        <h3>Built For Daily Use</h3>
+        <div class="hero-checklist">
+          <div class="hero-check"><span>1</span><div><strong>Follow-up and collections</strong><div class="meta">The work that slips first is surfaced first.</div></div></div>
+          <div class="hero-check"><span>2</span><div><strong>Project-level visibility</strong><div class="meta">Estimate, costs, schedule, invoice, and payment stay connected.</div></div></div>
+          <div class="hero-check"><span>3</span><div><strong>Low friction</strong><div class="meta">Local-first, fast to use, and simple to export.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="nav-row">
+    <button class="nav-btn active" onclick="showPanel('command', this)">Overview</button>
+    <button class="nav-btn" onclick="showPanel('jobs', this)">Jobs Board</button>
+    <button class="nav-btn" onclick="showPanel('money', this)">Cash Flow</button>
+    <button class="nav-btn" onclick="showPanel('field', this)">Field Log</button>
+    <button class="nav-btn" onclick="showPanel('tax', this)">Tax View</button>
+    <button class="nav-btn" onclick="showPanel('settings', this)">Admin</button>
   </div>
+
+  <main>
+    <section class="panel active" id="p-command">
+      <div class="stats-grid">
+        <div class="stat"><div class="eyebrow">Revenue Collected</div><strong class="t-teal" id="kpi-collected">$0.00</strong><p>Cash already in the bank based on recorded payments.</p></div>
+        <div class="stat"><div class="eyebrow">Open Pipeline</div><strong class="t-orange" id="kpi-pipeline">$0.00</strong><p>Open estimate value and work still moving toward the close.</p></div>
+        <div class="stat"><div class="eyebrow">Outstanding A/R</div><strong class="t-red" id="kpi-ar">$0.00</strong><p>Invoice balance still waiting on customer payment.</p></div>
+        <div class="stat"><div class="eyebrow">Owner Pay Ready</div><strong class="t-gold" id="kpi-net">$0.00</strong><p>Collected cash minus tracked job costs, expenses, and mileage deduction.</p></div>
+      </div>
+      <div class="split" style="margin-top:18px">
+        <div class="card">
+          <div class="card-head"><div><h3>Action Center</h3><p>The work that usually gets forgotten first: quote follow-up, deposit collection, and overdue invoices.</p></div><div class="pill payment" id="action-count">0 actions</div></div>
+          <div class="card-body"><div class="action-list" id="action-list"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><h3>Today Board</h3><p>Jobs scheduled for today or next up, plus the next action tied to each one.</p></div></div>
+          <div class="card-body"><div class="today-list" id="today-list"></div></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:18px">
+        <div class="card-head"><div><h3>Pipeline by Stage</h3><p>A clean view of where jobs are stalling so you can decide whether the problem is close rate, scheduling, or collections.</p></div></div>
+        <div class="card-body"><div class="board" id="board"></div></div>
+      </div>
+      <div class="split" style="margin-top:18px">
+        <div class="card"><div class="card-head"><div><h3>Collections Health</h3><p>See what needs a reminder before it becomes a cash-flow problem.</p></div></div><div class="card-body"><div class="aging-list" id="aging-list"></div></div></div>
+        <div class="card"><div class="card-head"><div><h3>Operating Snapshot</h3><p>What the business has in motion right now.</p></div></div><div class="card-body"><div class="mini-list" id="ops-list"></div></div></div>
+      </div>
+    </section>
+
+    <section class="panel" id="p-jobs">
+      <div class="split">
+        <div class="card">
+          <div class="card-head"><div><h3>Project Intake + Update</h3><p>Create a new opportunity or update an active project without hunting around the app.</p></div><button class="btn btn-ghost" onclick="resetProjectForm()">Clear Form</button></div>
+          <div class="card-body">
+            <div class="form-grid cols-4">
+              <div class="field"><label>Client</label><input type="text" id="job-client" placeholder="Acme Dental"></div>
+              <div class="field"><label>Project / Work Order</label><input type="text" id="job-title" placeholder="MDF upgrade and AP replacement"></div>
+              <div class="field"><label>Trade</label><select id="job-trade"></select></div>
+              <div class="field"><label>Stage</label><select id="job-stage"></select></div>
+            </div>
+            <div class="form-grid cols-4" style="margin-top:12px">
+              <div class="field"><label>Job Source</label><select id="job-source"></select></div>
+              <div class="field"><label>Source Job ID</label><input type="text" id="job-source-id" placeholder="FN-883201 or WM-44219"></div>
+              <div class="field"><label>Source Status</label><input type="text" id="job-source-status" placeholder="Applied, Assigned, Invited"></div>
+              <div class="field"><label>Assigned Tech / Crew</label><input type="text" id="job-assignee" placeholder="You, Crew A, Sub team"></div>
+            </div>
+            <div class="form-grid cols-4" style="margin-top:12px">
+              <div class="field"><label>Estimate Value</label><input type="number" id="job-estimate" min="0" step="0.01" placeholder="0.00"></div>
+              <div class="field"><label>Invoice Amount</label><input type="number" id="job-invoiced" min="0" step="0.01" placeholder="0.00"></div>
+              <div class="field"><label>Amount Paid</label><input type="number" id="job-paid" min="0" step="0.01" placeholder="0.00"></div>
+              <div class="field"><label>Priority</label><select id="job-priority"><option>High</option><option selected>Medium</option><option>Low</option></select></div>
+            </div>
+            <div class="form-grid cols-4" style="margin-top:12px">
+              <div class="field"><label>Deposit Requested</label><input type="number" id="job-deposit-requested" min="0" step="0.01" placeholder="0.00"></div>
+              <div class="field"><label>Deposit Received</label><input type="number" id="job-deposit-received" min="0" step="0.01" placeholder="0.00"></div>
+              <div class="field"><label>Scheduled Date</label><input type="date" id="job-scheduled"></div>
+              <div class="field"><label>Payment Due</label><input type="date" id="job-due"></div>
+            </div>
+            <div class="form-grid cols-3" style="margin-top:12px">
+              <div class="field"><label>Materials Cost</label><input type="number" id="job-materials" min="0" step="0.01" placeholder="0.00"></div>
+              <div class="field"><label>Labor Cost</label><input type="number" id="job-labor" min="0" step="0.01" placeholder="0.00"></div>
+              <div class="field"><label>Subcontractors</label><input type="number" id="job-subs" min="0" step="0.01" placeholder="0.00"></div>
+            </div>
+            <div class="form-grid cols-3" style="margin-top:12px">
+              <div class="field"><label>Site / Address</label><input type="text" id="job-location" placeholder="123 Main St, Denver CO"></div>
+              <div class="field"><label>Contact</label><input type="text" id="job-contact" placeholder="Samantha Lee"></div>
+              <div class="field"><label>Next Action</label><input type="text" id="job-next-action" placeholder="Confirm access window and send deposit link"></div>
+            </div>
+            <div class="form-grid cols-2" style="margin-top:12px">
+              <div class="field"><label>Scope</label><textarea id="job-scope" placeholder="Install new rack UPS, patch panel cleanup, AP cutover."></textarea></div>
+              <div class="field"><label>Field Notes</label><textarea id="job-notes" placeholder="Badge needed after 8am. IDF ladder clearance is tight."></textarea></div>
+            </div>
+            <div class="btn-row"><button class="btn btn-primary" onclick="saveProject()">Save Project</button><button class="btn btn-secondary" onclick="duplicateProject()">Duplicate Selected</button><button class="btn btn-muted" onclick="markProjectPaid()">Mark Selected Paid</button><span class="meta" id="job-form-mode">Creating a new project</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><h3>How This Is Meant To Be Used</h3><p>A simple operating rhythm that works for both service calls and project-based jobs.</p></div></div>
+          <div class="card-body">
+            <div class="mini-list">
+              <div class="mini-item"><strong>1. Intake every opportunity</strong><div class="meta">Even small service calls belong in the system so follow-ups and collection risk stay visible.</div></div>
+              <div class="mini-item"><strong>2. Keep stage and next action current</strong><div class="meta">Those two fields power the action center, daily board, and cash forecast.</div></div>
+              <div class="mini-item"><strong>3. Track estimated and actuals together</strong><div class="meta">That closes the loop between selling, delivering, and protecting margin.</div></div>
+              <div class="mini-item"><strong>4. Record paid amounts the same day</strong><div class="meta">Your collected cash and A/R become accurate enough to actually manage from.</div></div>
+            </div>
+            <div class="footer-note">Built for network field technicians, low-voltage crews, electricians, HVAC, plumbing, remodeling, landscaping, cleaning, handyman work, and other contractor workflows that mix quoting, scheduling, dispatch, and field execution.</div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:18px">
+        <div class="card-head"><div><h3>Jobs Board</h3><p>Connected platform work and local jobs live in one board. Tap any project into the form to update it.</p></div><div class="pill active" id="project-count">0 projects</div></div>
+        <div class="card-body">
+          <div class="btn-row" style="margin-top:0;margin-bottom:18px">
+            <button class="btn btn-muted" onclick="downloadTemplate('fieldnation')">Field Nation CSV Template</button>
+            <button class="btn btn-muted" onclick="downloadTemplate('workmarket')">WorkMarket CSV Template</button>
+            <button class="btn btn-secondary" onclick="triggerJobsImport()">Import Jobs CSV</button>
+            <input id="jobs-import-file" type="file" accept=".csv" style="display:none" onchange="handleJobsImport(event)">
+          </div>
+          <div class="quad" style="margin-bottom:18px" id="lane-board"></div>
+          <div class="project-cards" id="project-cards"></div>
+          <div class="table-wrap" style="margin-top:18px"><table><thead><tr><th>Client / Job</th><th>Source</th><th>Stage</th><th>Scheduled</th><th>Estimate</th><th>Invoiced</th><th>Paid</th><th>Outstanding</th><th>Margin</th><th>Next Action</th><th>Actions</th></tr></thead><tbody id="project-table"></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="p-money">
+      <div class="stats-grid">
+        <div class="stat"><div class="eyebrow">Invoices Sent</div><strong class="t-orange" id="money-invoiced">$0.00</strong><p>Total invoiced across all projects.</p></div>
+        <div class="stat"><div class="eyebrow">Direct Job Costs</div><strong class="t-red" id="money-costs">$0.00</strong><p>Materials, labor, and subs tied directly to projects.</p></div>
+        <div class="stat"><div class="eyebrow">Operating Expenses</div><strong class="t-red" id="money-expenses">$0.00</strong><p>Fuel, software, supplies, admin, marketing, and other overhead.</p></div>
+        <div class="stat"><div class="eyebrow">Tracked Gross Margin</div><strong class="t-teal" id="money-margin">$0.00</strong><p>Collected cash minus direct job costs.</p></div>
+      </div>
+      <div class="split" style="margin-top:18px">
+        <div class="card">
+          <div class="card-head"><div><h3>Expense Log</h3><p>Capture overhead fast so project margin and tax estimates stay believable.</p></div></div>
+          <div class="card-body">
+            <div class="form-grid cols-4">
+              <div class="field"><label>Date</label><input type="date" id="exp-date"></div>
+              <div class="field"><label>Vendor / Note</label><input type="text" id="exp-vendor" placeholder="SupplyHouse"></div>
+              <div class="field"><label>Amount</label><input type="number" id="exp-amount" min="0" step="0.01" placeholder="0.00"></div>
+              <div class="field"><label>Category</label><select id="exp-category"></select></div>
+            </div>
+            <div class="form-grid cols-2" style="margin-top:12px">
+              <div class="field"><label>Linked Project</label><select id="exp-project"></select></div>
+              <div class="field"><label>Notes</label><input type="text" id="exp-notes" placeholder="Spare toner for staging bench"></div>
+            </div>
+            <div class="btn-row"><button class="btn btn-primary" onclick="saveExpense()">Log Expense</button></div>
+            <div class="table-wrap" style="margin-top:18px"><table><thead><tr><th>Date</th><th>Vendor</th><th>Category</th><th>Project</th><th>Amount</th><th>Notes</th><th>Actions</th></tr></thead><tbody id="expense-table"></tbody></table></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><h3>Accounts Receivable</h3><p>Follow-up targets sorted by urgency.</p></div></div>
+          <div class="card-body"><div class="aging-list" id="receivable-list"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="p-field">
+      <div class="split">
+        <div class="card">
+          <div class="card-head"><div><h3>Mileage + Trip Log</h3><p>Keep date, route, purpose, and job link together so the deduction stays defensible.</p></div></div>
+          <div class="card-body">
+            <div class="form-grid cols-4">
+              <div class="field"><label>Date</label><input type="date" id="mi-date"></div>
+              <div class="field"><label>Start Odometer</label><input type="number" id="mi-start" min="0" step="0.1" placeholder="55000"></div>
+              <div class="field"><label>End Odometer</label><input type="number" id="mi-end" min="0" step="0.1" placeholder="55042.6"></div>
+              <div class="field"><label>Linked Project</label><select id="mi-project"></select></div>
+            </div>
+            <div class="form-grid cols-2" style="margin-top:12px">
+              <div class="field"><label>Business Purpose</label><input type="text" id="mi-purpose" placeholder="Network cutover and rack cleanup"></div>
+              <div class="field"><label>Route</label><input type="text" id="mi-route" placeholder="Home -> Site -> Supplier"></div>
+            </div>
+            <div class="btn-row"><button class="btn btn-primary" onclick="saveMileage()">Log Mileage</button><span class="meta" id="mi-preview">Enter start and end odometer to preview the deduction.</span></div>
+            <div class="table-wrap" style="margin-top:18px"><table><thead><tr><th>Date</th><th>Project</th><th>Miles</th><th>Deduction</th><th>Purpose</th><th>Route</th><th>Actions</th></tr></thead><tbody id="mileage-table"></tbody></table></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><h3>Receipt Vault + Filename Generator</h3><p>Standardize receipt names so backups, audits, and tax prep are less painful later.</p></div></div>
+          <div class="card-body">
+            <div class="form-grid cols-2">
+              <div class="field"><label>Date</label><input type="date" id="rv-date"></div>
+              <div class="field"><label>Vendor</label><input type="text" id="rv-vendor" placeholder="Home Depot"></div>
+            </div>
+            <div class="form-grid cols-2" style="margin-top:12px">
+              <div class="field"><label>Amount</label><input type="number" id="rv-amount" min="0" step="0.01" placeholder="47.82"></div>
+              <div class="field"><label>Category</label><select id="rv-category"></select></div>
+            </div>
+            <div class="btn-row"><button class="btn btn-primary" onclick="generateFilename()">Generate</button><button class="btn btn-muted" onclick="copyFilename()">Copy</button><button class="btn btn-secondary" onclick="receiptToExpense()">Log As Expense</button></div>
+            <div class="empty" style="margin-top:16px"><strong style="display:block;margin-bottom:8px">Suggested filename</strong><div id="rv-output" class="num">No filename generated yet.</div></div>
+            <div class="footer-note">Format: <span class="num">YYYY-MM-DD_Vendor_Amount_Category.pdf</span>. The point is less perfection and more consistency so files remain searchable later.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="p-tax">
+      <div class="stats-grid">
+        <div class="stat"><div class="eyebrow">Mileage Deduction</div><strong class="t-gold" id="tax-mileage">$0.00</strong><p>Business mileage multiplied by the current stored rate.</p></div>
+        <div class="stat"><div class="eyebrow">Taxable Net</div><strong class="t-teal" id="tax-net">$0.00</strong><p>Collected revenue minus direct costs, expenses, and mileage deduction.</p></div>
+        <div class="stat"><div class="eyebrow">Estimated SE Tax</div><strong class="t-orange" id="tax-se">$0.00</strong><p>Quick self-employment tax estimate, not full federal or state tax.</p></div>
+        <div class="stat"><div class="eyebrow">Quarterly Set-Aside</div><strong class="t-red" id="tax-quarter">$0.00</strong><p>Simple reserve target if you want to hold back one quarter at a time.</p></div>
+      </div>
+      <div class="split" style="margin-top:18px">
+        <div class="card"><div class="card-head"><div><h3>Quarterly Reserve Plan</h3><p>Built for fast planning, not tax filing. Use it to prevent surprises.</p></div></div><div class="card-body"><div class="mini-list" id="quarter-list"></div><div class="footer-note">This estimate uses the stored mileage rate and a self-employment tax formula of taxable net × 92.35% × 15.3%. It does not include federal income tax, state tax, credits, depreciation, or entity-specific treatment.</div></div></div>
+        <div class="card"><div class="card-head"><div><h3>Readiness Checklist</h3><p>What to keep current so books and taxes are not a scramble later.</p></div></div><div class="card-body"><div class="mini-list"><div class="mini-item"><strong>Every invoice needs a paid amount or an A/R follow-up date</strong><div class="meta">If cash hasn’t landed, it should still be visible as work in collections.</div></div><div class="mini-item"><strong>Every business drive needs purpose and route</strong><div class="meta">That is what keeps mileage logs usable instead of aspirational.</div></div><div class="mini-item"><strong>Every expense should have category and source receipt</strong><div class="meta">This file handles the naming pattern; store the PDF or image wherever you keep records.</div></div><div class="mini-item"><strong>Export monthly, not annually</strong><div class="meta">The best backup workflow is the one you will actually keep doing.</div></div></div></div></div>
+      </div>
+    </section>
+
+    <section class="panel" id="p-settings">
+      <div class="split">
+        <div class="card">
+          <div class="card-head"><div><h3>Business Profile</h3><p>These settings affect labels, trade defaults, and tax assumptions inside the file.</p></div></div>
+          <div class="card-body">
+            <div class="form-grid cols-2">
+              <div class="field"><label>Business Name</label><input type="text" id="set-name" placeholder="Northline Field Services"></div>
+              <div class="field"><label>Owner / Lead Tech</label><input type="text" id="set-owner" placeholder="Alex Carter"></div>
+            </div>
+            <div class="form-grid cols-3" style="margin-top:12px">
+              <div class="field"><label>Primary Trade</label><select id="set-trade"></select></div>
+              <div class="field"><label>Tax Year</label><select id="set-year"></select></div>
+              <div class="field"><label>Mileage Rate</label><input type="number" id="set-mile-rate" min="0" step="0.001" placeholder="0.725"></div>
+            </div>
+            <div class="form-grid cols-2" style="margin-top:12px">
+              <div class="field"><label>Target Margin %</label><input type="number" id="set-margin-target" min="0" step="1" placeholder="35"></div>
+              <div class="field"><label>Default Payment Terms</label><input type="text" id="set-terms" placeholder="Net 15"></div>
+            </div>
+            <div class="btn-row"><button class="btn btn-primary" onclick="saveSettings()">Save Settings</button></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><h3>Data + Backups</h3><p>Everything stays local to this browser unless you export it.</p></div></div>
+          <div class="card-body">
+            <div class="btn-row" style="margin-top:0"><button class="btn btn-muted" onclick="exportJSON()">Export JSON</button><button class="btn btn-muted" onclick="triggerImport()">Import JSON</button><button class="btn btn-secondary" onclick="loadDemoData()">Try Sample Data</button><button class="btn btn-danger" onclick="confirmClear()">Clear Everything</button><input id="import-file" type="file" accept=".json" style="display:none" onchange="handleImport(event)"></div>
+            <div class="mini-list" style="margin-top:18px">
+              <div class="mini-item"><strong>Local-first by design</strong><div class="meta">Useful on a laptop in the truck, useful on a desktop in the office, and no setup friction.</div></div>
+              <div class="mini-item"><strong>CSV for accounting handoff</strong><div class="meta">Good for accountants, spreadsheets, year-end review, and external bookkeeping cleanup.</div></div>
+              <div class="mini-item"><strong>JSON for full restore</strong><div class="meta">Includes projects, expenses, mileage, and business settings in one backup file.</div></div>
+            </div>
+            <div class="footer-note" id="storage-note">Storage mode: browser localStorage</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><h3>Connection Hub</h3><p>Planned connector home for marketplace and CRM sync. Local jobs work now; account sync comes later.</p></div></div>
+          <div class="card-body">
+            <div class="connector-grid" id="connector-grid"></div>
+            <div class="connector-note" style="margin-top:14px">For now the board supports local jobs and imported/manual copies from external platforms. The connection model is in place so official connectors can slot in cleanly later without changing how contractors use the app.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 </div>
 
-<!-- MAIN -->
-<div id="main">
-
-  <!-- DASHBOARD -->
-  <div id="p-dashboard" class="panel active">
-    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
-      <div class="kpi">
-        <div class="kpi-label">Net Profit (YTD)</div>
-        <div class="kpi-val lime" id="kpi-profit">$0.00</div>
-        <div class="kpi-sub">Gross &minus; Expenses &minus; Mileage</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">SE Tax Owed (Est.)</div>
-        <div class="kpi-val amber" id="kpi-tax">$0.00</div>
-        <div class="kpi-sub">Net &times; 92.35% &times; 15.3%</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">YTD Miles</div>
-        <div class="kpi-val neutral" id="kpi-miles">0</div>
-        <div class="kpi-sub" id="kpi-miles-sub">$0.00 deduction</div>
-      </div>
-    </div>
-    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
-      <div class="kpi">
-        <div class="kpi-label">Gross Income (Paid)</div>
-        <div class="kpi-val lime" id="kpi-gross">$0.00</div>
-        <div class="kpi-sub" id="kpi-wo-count">0 paid orders</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Total Expenses</div>
-        <div class="kpi-val red" id="kpi-exp">$0.00</div>
-        <div class="kpi-sub" id="kpi-exp-count">0 entries</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Next Qtr. Payment</div>
-        <div class="kpi-val amber" id="kpi-qtr">$0.00</div>
-        <div class="kpi-sub" id="kpi-qtr-label">Estimated</div>
-      </div>
-    </div>
-    <div class="section">
-      <div class="section-hdr">
-        Recent Work Orders
-        <span class="section-hdr-note">Last 5</span>
-      </div>
-      <div class="table-wrap" id="dash-recent">
-        <div class="empty"><div class="empty-icon">&#9632;</div>No work orders logged yet. Go to Ledger to add one.</div>
-      </div>
-    </div>
-    <div class="section">
-      <div class="section-hdr">Recent Mileage Trips <span class="section-hdr-note">Last 5</span></div>
-      <div class="table-wrap" id="dash-miles">
-        <div class="empty"><div class="empty-icon">&#9632;</div>No trips logged yet.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- LEDGER -->
-  <div id="p-ledger" class="panel">
-    <div class="section">
-      <div class="section-hdr">Add Work Order</div>
-      <div class="section-body">
-        <div class="form-row c4">
-          <div class="form-group">
-            <label>Work Order ID</label>
-            <input type="text" id="wo-id" placeholder="WO-2026-001">
-          </div>
-          <div class="form-group">
-            <label>Platform</label>
-            <select id="wo-platform">
-              <option>WorkMarket</option>
-              <option>Field Nation</option>
-              <option>Upwork</option>
-              <option>Direct Client</option>
-              <option>Subcontract</option>
-              <option>Other</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Amount ($)</label>
-            <input type="number" id="wo-amount" min="0" step="0.01" placeholder="0.00">
-          </div>
-          <div class="form-group">
-            <label>Date</label>
-            <input type="date" id="wo-date">
-          </div>
-        </div>
-        <div class="form-row c3">
-          <div class="form-group">
-            <label>Status</label>
-            <select id="wo-status">
-              <option>Paid</option>
-              <option>Pending</option>
-              <option>Disputed</option>
-            </select>
-          </div>
-          <div class="form-group" style="grid-column:span 2">
-            <label>Description / Site</label>
-            <input type="text" id="wo-desc" placeholder="Router install — 123 Main St, Denver CO">
-          </div>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-lime" onclick="addWorkOrder()">+ Add Work Order</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-hdr">
-        Master Ledger
-        <span class="section-hdr-note" id="ledger-count">0 entries</span>
-      </div>
-      <div class="table-wrap" id="ledger-table">
-        <div class="empty"><div class="empty-icon">&#9632;</div>No work orders yet.</div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-hdr">Log Expense</div>
-      <div class="section-body">
-        <div class="form-row c4">
-          <div class="form-group">
-            <label>Date</label>
-            <input type="date" id="exp-date">
-          </div>
-          <div class="form-group">
-            <label>Vendor / Description</label>
-            <input type="text" id="exp-vendor" placeholder="Home Depot">
-          </div>
-          <div class="form-group">
-            <label>Amount ($)</label>
-            <input type="number" id="exp-amount" min="0" step="0.01" placeholder="0.00">
-          </div>
-          <div class="form-group">
-            <label>Category</label>
-            <select id="exp-cat">
-              <option>Tools &amp; Equipment</option>
-              <option>Vehicle &amp; Transport</option>
-              <option>Phone &amp; Internet</option>
-              <option>Software &amp; Subscriptions</option>
-              <option>PPE &amp; Safety</option>
-              <option>Office Supplies</option>
-              <option>Training &amp; Certs</option>
-              <option>Materials</option>
-              <option>Fuel</option>
-              <option>Other</option>
-            </select>
-          </div>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-amber" onclick="addExpense()">+ Log Expense</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-hdr">
-        Expense Log
-        <span class="section-hdr-note" id="exp-count">0 entries</span>
-      </div>
-      <div class="table-wrap" id="exp-table">
-        <div class="empty"><div class="empty-icon">&#9632;</div>No expenses logged yet.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MILEAGE -->
-  <div id="p-mileage" class="panel">
-    <div class="section">
-      <div class="section-hdr">
-        Log Mileage Trip
-        <span class="section-hdr-note">2026 IRS Rate: $0.725 / mile</span>
-      </div>
-      <div class="section-body">
-        <div class="form-row c4">
-          <div class="form-group">
-            <label>Date</label>
-            <input type="date" id="mi-date">
-          </div>
-          <div class="form-group">
-            <label>Odometer Start (mi)</label>
-            <input type="number" id="mi-start" min="0" step="1" placeholder="55000" oninput="previewMiles()">
-          </div>
-          <div class="form-group">
-            <label>Odometer End (mi)</label>
-            <input type="number" id="mi-end" min="0" step="1" placeholder="55078" oninput="previewMiles()">
-          </div>
-          <div class="form-group">
-            <label>Linked WO ID (opt.)</label>
-            <input type="text" id="mi-wo" placeholder="WO-2026-001">
-          </div>
-        </div>
-        <div class="form-row c2">
-          <div class="form-group">
-            <label>Business Purpose (required by IRS)</label>
-            <input type="text" id="mi-purpose" placeholder="Client site visit — 123 Main St, Denver CO">
-          </div>
-          <div class="form-group">
-            <label>From → To</label>
-            <input type="text" id="mi-route" placeholder="Home → Client Site">
-          </div>
-        </div>
-        <div id="mi-preview" class="alert alert-lime"></div>
-        <div class="btn-row">
-          <button class="btn btn-lime" onclick="addMileage()">+ Log Trip</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-hdr">
-        Mileage Log
-        <span class="section-hdr-note" id="mi-count">0 trips &mdash; 0.0 mi total</span>
-      </div>
-      <div class="table-wrap" id="mi-table">
-        <div class="empty"><div class="empty-icon">&#9632;</div>No trips logged yet.</div>
-      </div>
-    </div>
-
-    <div class="note">
-      IRS Pub 463: Log date, destination, business purpose, and odometer readings for every trip. This log satisfies that requirement. Keep supporting documentation (receipts, work orders) with this export.
-    </div>
-  </div>
-
-  <!-- RECEIPT VAULT -->
-  <div id="p-vault" class="panel">
-    <div class="section">
-      <div class="section-hdr">Receipt Filename Generator</div>
-      <div class="section-body">
-        <div class="form-row c4">
-          <div class="form-group">
-            <label>Date</label>
-            <input type="date" id="rv-date">
-          </div>
-          <div class="form-group">
-            <label>Vendor Name</label>
-            <input type="text" id="rv-vendor" placeholder="Home Depot">
-          </div>
-          <div class="form-group">
-            <label>Amount ($)</label>
-            <input type="number" id="rv-amount" min="0" step="0.01" placeholder="47.82">
-          </div>
-          <div class="form-group">
-            <label>Category</label>
-            <select id="rv-cat">
-              <option>Tools</option>
-              <option>Equipment</option>
-              <option>Vehicle</option>
-              <option>Phone</option>
-              <option>Internet</option>
-              <option>Software</option>
-              <option>PPE</option>
-              <option>Office</option>
-              <option>Training</option>
-              <option>Fuel</option>
-              <option>Materials</option>
-              <option>Other</option>
-            </select>
-          </div>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-lime" onclick="generateFilename()">Generate Filename</button>
-        </div>
-        <div id="rv-output" style="display:none">
-          <div class="vault-output" id="rv-name"></div>
-          <div class="btn-row">
-            <button class="btn btn-lime" onclick="copyFilename()">Copy to Clipboard</button>
-            <button class="btn btn-ghost btn-sm" onclick="logReceiptAsExpense()">Also Log as Expense</button>
-            <span id="rv-copied" style="color:var(--lime);font-size:11px;display:none;align-self:center">&#10003; Copied!</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-hdr">Naming Convention</div>
-      <div class="section-body">
-        <div style="color:var(--text2);font-size:12px;line-height:2">
-          Format: <span style="color:var(--lime)">YYYY-MM-DD_Vendor_Amount_Category.pdf</span><br>
-          Example: <span style="color:var(--amber)">2026-04-15_HomeDepot_47.82_Tools.pdf</span><br>
-          Spaces replaced with underscores. Special characters stripped. Amount formatted to 2 decimal places.<br>
-          Use this filename when scanning / photographing receipts before upload to cloud storage.
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-hdr">Filing Checklist</div>
-      <div class="section-body">
-        <div class="info-row"><span class="info-row-label">Rename receipt file using generator above</span><span style="color:var(--lime)">Step 1</span></div>
-        <div class="info-row"><span class="info-row-label">Upload to cloud folder (Google Drive / Dropbox)</span><span style="color:var(--lime)">Step 2</span></div>
-        <div class="info-row"><span class="info-row-label">Log expense in Ledger tab</span><span style="color:var(--lime)">Step 3</span></div>
-        <div class="info-row"><span class="info-row-label">Export CSV monthly for accountant / tax prep</span><span style="color:var(--lime)">Step 4</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAX ENGINE -->
-  <div id="p-tax" class="panel">
-    <div class="section">
-      <div class="section-hdr">
-        2026 Self-Employment Tax Engine
-        <span class="section-hdr-note">Schedule SE &mdash; IRS Form 1040</span>
-      </div>
-      <div class="section-body">
-        <div class="tax-grid">
-          <div class="tax-card">
-            <div class="tax-card-label">Gross Income (Paid)</div>
-            <div class="tax-card-val" style="color:var(--lime)" id="tx-gross">$0.00</div>
-          </div>
-          <div class="tax-card">
-            <div class="tax-card-label">Total Deductions</div>
-            <div class="tax-card-val" style="color:var(--red)" id="tx-deductions">$0.00</div>
-          </div>
-          <div class="tax-card">
-            <div class="tax-card-label">Net Profit / Loss</div>
-            <div class="tax-card-val" id="tx-net">$0.00</div>
-          </div>
-        </div>
-        <div class="divider"></div>
-        <div class="tax-grid">
-          <div class="tax-card">
-            <div class="tax-card-label">SE Taxable Base (&#215;92.35%)</div>
-            <div class="tax-card-val" style="color:var(--text)" id="tx-base">$0.00</div>
-          </div>
-          <div class="tax-card">
-            <div class="tax-card-label">SE Tax Liability (&#215;15.3%)</div>
-            <div class="tax-card-val" style="color:var(--amber)" id="tx-se">$0.00</div>
-          </div>
-          <div class="tax-card">
-            <div class="tax-card-label">Effective Rate vs. Gross</div>
-            <div class="tax-card-val" style="color:var(--text2)" id="tx-rate">0.00%</div>
-          </div>
-        </div>
-        <div class="divider"></div>
-        <div style="font-size:10px;color:var(--amber);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Quarterly Estimated Payments (Form 1040-ES)</div>
-        <div class="tax-grid">
-          <div class="tax-card">
-            <div class="tax-card-label">Q1 &mdash; Due Apr 15, 2026</div>
-            <div class="tax-card-val" style="color:var(--amber);font-size:16px" id="q1">$0.00</div>
-          </div>
-          <div class="tax-card">
-            <div class="tax-card-label">Q2 &mdash; Due Jun 16, 2026</div>
-            <div class="tax-card-val" style="color:var(--amber);font-size:16px" id="q2">$0.00</div>
-          </div>
-          <div class="tax-card">
-            <div class="tax-card-label">Q3 &mdash; Due Sep 15, 2026</div>
-            <div class="tax-card-val" style="color:var(--amber);font-size:16px" id="q3">$0.00</div>
-          </div>
-        </div>
-        <div class="tax-card" style="margin-top:10px;text-align:center">
-          <div class="tax-card-label">Q4 &mdash; Due Jan 15, 2027</div>
-          <div class="tax-card-val" style="color:var(--amber);font-size:16px" id="q4">$0.00</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-hdr">Deduction Breakdown</div>
-      <div class="section-body">
-        <div class="info-row">
-          <span class="info-row-label">Business Expenses</span>
-          <span class="info-row-val" style="color:var(--red)" id="tx-exp-sub">$0.00</span>
-        </div>
-        <div class="info-row">
-          <span class="info-row-label">Mileage Deduction (<span id="tx-mi-count2">0</span> mi &times; $0.725)</span>
-          <span class="info-row-val" style="color:var(--red)" id="tx-mi-sub">$0.00</span>
-        </div>
-        <div class="info-row total">
-          <span class="info-row-label">Total Deductions</span>
-          <span class="info-row-val" style="color:var(--red)" id="tx-total-ded">$0.00</span>
-        </div>
-        <div class="divider"></div>
-        <div class="info-row">
-          <span class="info-row-label">SE Tax Deduction (50% of SE tax &mdash; Schedule 1)</span>
-          <span class="info-row-val" style="color:var(--lime)" id="tx-se-ded">$0.00</span>
-        </div>
-        <div style="margin-top:12px" class="note">
-          SE tax formula: Net Profit &times; 0.9235 &times; 0.153. The 92.35% multiplier accounts for the employer-equivalent deduction. You may deduct 50% of SE tax on Schedule 1, reducing your income tax (not shown here). This tool calculates SE tax only. Federal/state income tax requires a full return. Consult a CPA for your complete liability.
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SETTINGS -->
-  <div id="p-settings" class="panel">
-    <div class="section">
-      <div class="section-hdr">Contractor Profile</div>
-      <div class="section-body">
-        <div class="form-row c2">
-          <div class="form-group">
-            <label>Your Name / Business Name</label>
-            <input type="text" id="set-name" placeholder="John Smith / Smith IT Services LLC" oninput="saveSettings()">
-          </div>
-          <div class="form-group">
-            <label>EIN / SSN Last 4 (for reference)</label>
-            <input type="text" id="set-ein" placeholder="XX-XXXXXXX" oninput="saveSettings()">
-          </div>
-        </div>
-        <div class="form-row c2">
-          <div class="form-group">
-            <label>Primary Platform</label>
-            <select id="set-platform" onchange="saveSettings()">
-              <option>WorkMarket</option>
-              <option>Field Nation</option>
-              <option>Both</option>
-              <option>Other</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Tax Year</label>
-            <select id="set-year" onchange="saveSettings()">
-              <option>2026</option>
-              <option>2025</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-hdr">Data Management</div>
-      <div class="section-body">
-        <div class="btn-row">
-          <button class="btn btn-lime" onclick="exportCSV()">Export Full CSV Backup</button>
-          <button class="btn btn-ghost" onclick="exportJSON()">Export JSON Backup</button>
-          <button class="btn btn-ghost" onclick="importJSON()">Import JSON</button>
-          <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
-        </div>
-        <div class="divider"></div>
-        <div class="note" style="margin-bottom:12px">
-          All data is saved in your browser's localStorage. It persists across sessions on this device. Export CSV monthly as a permanent backup. If you clear browser data, your records will be lost unless you have a JSON backup.
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-red btn-sm" onclick="confirmClear()">Clear All Data</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-hdr">About</div>
-      <div class="section-body">
-        <div class="info-row"><span class="info-row-label">Version</span><span class="info-row-val" style="color:var(--lime)">1.0.0</span></div>
-        <div class="info-row"><span class="info-row-label">IRS Mileage Rate</span><span class="info-row-val">$0.725 / mile (2026)</span></div>
-        <div class="info-row"><span class="info-row-label">SE Tax Formula</span><span class="info-row-val">Net &times; 92.35% &times; 15.3%</span></div>
-        <div class="info-row"><span class="info-row-label">Data Storage</span><span class="info-row-val">localStorage (local device only)</span></div>
-        <div class="info-row"><span class="info-row-label">Built For</span><span class="info-row-val">Independent IT Field Technicians</span></div>
-      </div>
-    </div>
-  </div>
-
-</div><!-- /main -->
-
-<!-- STATUS BAR -->
-<div id="statusbar">
-  <span><div class="dot" style="background:var(--lime)"></div>SYSTEM ONLINE</span>
-  <span id="sb-date"></span>
-  <span>STORAGE: <span id="sb-storage" style="color:var(--lime)">LOCAL</span></span>
-  <span>RATE: $0.725/MI</span>
-  <span style="margin-left:auto" id="sb-name"></span>
-</div>
-
-<!-- TOAST -->
-<div id="toast"></div>
-
-<!-- MODAL -->
-<div id="modal-overlay">
-  <div class="modal">
-    <div class="modal-hdr">
-      <span id="modal-title">Confirm</span>
-      <button class="del-btn" onclick="closeModal()" style="font-size:16px">&times;</button>
-    </div>
-    <div class="modal-body">
-      <div class="modal-msg" id="modal-msg"></div>
-      <div class="modal-actions" id="modal-actions"></div>
-    </div>
-  </div>
-</div>
+<div class="toast" id="toast"></div>
+<div class="modal-shell" id="modal-shell"><div class="modal"><h3 id="modal-title">Confirm</h3><p id="modal-message"></p><div class="btn-row" id="modal-actions"></div></div></div>
 
 <script>
 'use strict';
 
-// ── CONSTANTS ──────────────────────────────────────────────
-const IRS_RATE = 0.725;
-const STORAGE_KEY = 'fieldops_v1';
-
-// ── STATE ──────────────────────────────────────────────────
-let state = {
-  workOrders: [],
-  expenses: [],
-  mileage: [],
-  settings: { name: '', ein: '', platform: 'WorkMarket', year: '2026' }
+const STORAGE_KEY = 'contractor_command_os_v2';
+const STAGES = ['Inquiry', 'Estimate Sent', 'Deposit Needed', 'Scheduled', 'Active', 'Awaiting Payment', 'Paid'];
+const BOARD_STAGES = ['Inquiry', 'Estimate Sent', 'Deposit Needed', 'Scheduled', 'Active', 'Awaiting Payment'];
+const TRADES = ['Network / Low Voltage', 'Electrical', 'HVAC', 'Plumbing', 'Carpentry', 'Painting', 'Flooring', 'Roofing', 'Landscaping', 'Cleaning', 'Handyman', 'General Contracting', 'Other'];
+const JOB_SOURCES = ['Local / Manual', 'Field Nation', 'WorkMarket', 'Thumbtack', 'Angi', 'Google LSA', 'Referral', 'Direct Client', 'Other'];
+const EXPENSE_CATEGORIES = ['Materials', 'Fuel', 'Tools', 'Vehicle', 'Software', 'Phone / Internet', 'PPE / Safety', 'Office', 'Marketing', 'Training', 'Meals', 'Subcontractor', 'Other'];
+const DEFAULT_SETTINGS = {
+  businessName: '',
+  owner: '',
+  primaryTrade: 'Network / Low Voltage',
+  taxYear: String(new Date().getFullYear()),
+  mileageRate: 0.725,
+  marginTarget: 35,
+  paymentTerms: 'Net 15'
 };
 
-// ── PERSISTENCE ────────────────────────────────────────────
+let state = {
+  projects: [],
+  expenses: [],
+  mileage: [],
+  settings: { ...DEFAULT_SETTINGS },
+  connectors: [],
+  syncQueue: [],
+  meta: { lastLocalSave: '', installMode: 'file' }
+};
+
+let editingProjectId = null;
+let pendingModalAction = null;
+let toastTimer = null;
+
+function todayLocal() {
+  const now = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
+function currency(value) {
+  return '$' + (+value || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function number1(value) {
+  return (+value || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
+function safeText(value) {
+  return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function uid(prefix) {
+  return prefix + '_' + Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4);
+}
+
+function daysSince(dateStr) {
+  if (!dateStr) return 0;
+  const then = new Date(dateStr.slice(0, 10) + 'T00:00:00');
+  const now = new Date(todayLocal() + 'T00:00:00');
+  return Math.floor((now - then) / 86400000);
+}
+
+function isPast(dateStr) {
+  return !!dateStr && dateStr < todayLocal();
+}
+
+function projectCost(project) {
+  return (+project.materials || 0) + (+project.labor || 0) + (+project.subs || 0);
+}
+
+function projectOutstanding(project) {
+  return Math.max((+project.invoiced || 0) - (+project.paid || 0), 0);
+}
+
+function projectMargin(project) {
+  return (+project.paid || 0) - projectCost(project);
+}
+
+function projectPillClass(stage) {
+  const map = { 'Inquiry':'inquiry', 'Estimate Sent':'estimate', 'Deposit Needed':'deposit', 'Scheduled':'scheduled', 'Active':'active', 'Awaiting Payment':'payment', 'Paid':'paid' };
+  return map[stage] || 'inquiry';
+}
+
+function priorityClass(priority) {
+  return priority === 'High' ? 'priority-high' : priority === 'Low' ? 'priority-low' : 'priority-medium';
+}
+
+function isConnectedSource(source) {
+  return ['Field Nation', 'WorkMarket', 'Thumbtack', 'Angi', 'Google LSA'].includes(source);
+}
+
+function isLeadSource(source) {
+  return ['Thumbtack', 'Angi', 'Google LSA', 'Referral'].includes(source);
+}
+
+function projectLabel(projectId) {
+  if (!projectId) return '';
+  const project = state.projects.find(item => item.id === projectId);
+  return project ? project.client + ' · ' + project.title : '';
+}
+
+function totals() {
+  const collected = state.projects.reduce((sum, p) => sum + (+p.paid || 0), 0);
+  const invoiced = state.projects.reduce((sum, p) => sum + (+p.invoiced || 0), 0);
+  const pipeline = state.projects.filter(p => p.stage !== 'Paid').reduce((sum, p) => sum + (+p.estimate || 0), 0);
+  const outstanding = state.projects.reduce((sum, p) => sum + projectOutstanding(p), 0);
+  const directCosts = state.projects.reduce((sum, p) => sum + projectCost(p), 0);
+  const expenses = state.expenses.reduce((sum, e) => sum + (+e.amount || 0), 0);
+  const mileageMiles = state.mileage.reduce((sum, m) => sum + (+m.miles || 0), 0);
+  const mileageDeduction = mileageMiles * (+state.settings.mileageRate || 0);
+  const taxableNet = collected - directCosts - expenses - mileageDeduction;
+  const seTax = Math.max(0, taxableNet) * 0.9235 * 0.153;
+  return { collected, invoiced, pipeline, outstanding, directCosts, expenses, mileageMiles, mileageDeduction, taxableNet, grossMargin: collected - directCosts, ownerPayReady: taxableNet, seTax };
+}
+
+function makeActions() {
+  const actions = [];
+  state.projects.forEach(project => {
+    if (project.stage === 'Estimate Sent' && daysSince(project.updatedAt || project.createdAt) >= 5) {
+      actions.push({ level:'orange', title:'Follow up quote', note:project.client + ' · ' + project.title, amount:currency(project.estimate), sort:2 });
+    }
+    if ((project.stage === 'Deposit Needed' || project.stage === 'Scheduled') && (+project.depositRequested || 0) > (+project.depositReceived || 0)) {
+      actions.push({ level:'gold', title:'Collect deposit', note:project.client + ' · remaining ' + currency((+project.depositRequested || 0) - (+project.depositReceived || 0)), amount:currency(project.depositRequested), sort:1 });
+    }
+    if (project.stage === 'Awaiting Payment' && projectOutstanding(project) > 0) {
+      actions.push({ level:isPast(project.dueDate) ? 'red' : 'orange', title:isPast(project.dueDate) ? 'Overdue invoice' : 'Invoice still open', note:project.client + ' · ' + project.title, amount:currency(projectOutstanding(project)), sort:isPast(project.dueDate) ? 0 : 4 });
+    }
+    if (project.stage === 'Inquiry' && daysSince(project.updatedAt || project.createdAt) >= 2) {
+      actions.push({ level:'teal', title:'Qualify lead', note:project.client + ' · ' + project.title, amount:project.trade, sort:5 });
+    }
+  });
+  return actions.sort((a, b) => a.sort - b.sort || a.title.localeCompare(b.title));
+}
+
+function todayProjects() {
+  const today = todayLocal();
+  return state.projects
+    .filter(project => project.scheduledDate === today || project.stage === 'Active' || project.stage === 'Scheduled')
+    .sort((a, b) => (a.scheduledDate || '9999-12-31').localeCompare(b.scheduledDate || '9999-12-31'))
+    .slice(0, 6);
+}
+
+function stageSummary(stage) {
+  const items = state.projects.filter(project => project.stage === stage);
+  return { items };
+}
+
 function saveState() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch(e) {
-    console.warn('localStorage unavailable:', e);
-  }
+  state.meta = state.meta || {};
+  state.meta.lastLocalSave = new Date().toISOString();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const loaded = JSON.parse(raw);
-      state = Object.assign({ workOrders: [], expenses: [], mileage: [], settings: {} }, loaded);
-      state.settings = Object.assign({ name: '', ein: '', platform: 'WorkMarket', year: '2026' }, state.settings);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    state.projects = Array.isArray(parsed.projects) ? parsed.projects : [];
+    state.expenses = Array.isArray(parsed.expenses) ? parsed.expenses : [];
+    state.mileage = Array.isArray(parsed.mileage) ? parsed.mileage : [];
+    state.settings = { ...DEFAULT_SETTINGS, ...(parsed.settings || {}) };
+    state.connectors = Array.isArray(parsed.connectors) ? parsed.connectors : [];
+    state.syncQueue = Array.isArray(parsed.syncQueue) ? parsed.syncQueue : [];
+    state.meta = { lastLocalSave: '', installMode: 'file', ...(parsed.meta || {}) };
+  } catch (error) {
+    showToast('Could not load saved data. Starting fresh.', true);
+  }
+}
+
+function queueSync(eventType, entityType, entityId) {
+  state.syncQueue = Array.isArray(state.syncQueue) ? state.syncQueue : [];
+  state.syncQueue.push({
+    id: uid('sync'),
+    at: new Date().toISOString(),
+    eventType,
+    entityType,
+    entityId: entityId || ''
+  });
+}
+
+function ensureConnectors() {
+  const defaults = [
+    { platform: 'Field Nation', status: 'available', lane: 'Technician marketplace', mode: 'OAuth/API', note: 'Best fit for network field techs and assigned work orders.', accountLabel: '', lastSync: '', scopes: 'Jobs, status, payout refs' },
+    { platform: 'WorkMarket', status: 'available', lane: 'Technician marketplace', mode: 'OAuth/API', note: 'Strong fit for provider accounts and contracted work.', accountLabel: '', lastSync: '', scopes: 'Assignments, status, payments' },
+    { platform: 'Thumbtack', status: 'planned', lane: 'Lead marketplace', mode: 'Partner API', note: 'Useful for residential/service leads once partner access is approved.', accountLabel: '', lastSync: '', scopes: 'Leads, messages, negotiations' },
+    { platform: 'Angi', status: 'planned', lane: 'Lead marketplace', mode: 'Lead API/Webhook', note: 'Good candidate for lead intake and follow-up routing.', accountLabel: '', lastSync: '', scopes: 'Lead intake, status routing' },
+    { platform: 'Jobber', status: 'planned', lane: 'Back-office sync', mode: 'OAuth/API', note: 'Good V2 sync target for contractors already operating in Jobber.', accountLabel: '', lastSync: '', scopes: 'Customers, jobs, invoices' },
+    { platform: 'Housecall Pro', status: 'planned', lane: 'Back-office sync', mode: 'API/Job Inbox', note: 'Useful for service businesses managing jobs elsewhere already.', accountLabel: '', lastSync: '', scopes: 'Jobs, leads, invoices' }
+  ];
+  if (!Array.isArray(state.connectors) || !state.connectors.length) {
+    state.connectors = defaults;
+    return;
+  }
+  defaults.forEach(defaultConnector => {
+    if (!state.connectors.find(item => item.platform === defaultConnector.platform)) {
+      state.connectors.push(defaultConnector);
     }
-  } catch(e) {
-    console.warn('Failed to load state:', e);
-  }
+  });
 }
 
-// ── FORMAT HELPERS ─────────────────────────────────────────
-function fmt(n) {
-  const abs = Math.abs(+n || 0);
-  return '$' + abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-function fmtSigned(n) {
-  const v = +n || 0;
-  return (v < 0 ? '-' : '') + fmt(v);
-}
-function fmtMi(n) {
-  return (+n || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-}
-function today() {
-  return new Date().toISOString().slice(0, 10);
-}
-function badgeClass(s) {
-  if (s === 'Paid') return 'badge-paid';
-  if (s === 'Pending') return 'badge-pending';
-  return 'badge-disputed';
+function saveLabel(dateStr) {
+  if (!dateStr) return 'Saved locally';
+  const d = new Date(dateStr);
+  return 'Saved locally · ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 }
 
-// ── CALCULATIONS ───────────────────────────────────────────
-function calcTotals() {
-  const paidOrders = state.workOrders.filter(o => o.status === 'Paid');
-  const gross = paidOrders.reduce((s, o) => s + (+o.amount || 0), 0);
-  const totalExp = state.expenses.reduce((s, e) => s + (+e.amount || 0), 0);
-  const totalMiles = state.mileage.reduce((s, m) => s + (+m.miles || 0), 0);
-  const mileDeduction = totalMiles * IRS_RATE;
-  const netProfit = gross - totalExp - mileDeduction;
-  const seBase = Math.max(0, netProfit) * 0.9235;
-  const seTax = seBase * 0.153;
-  const effectiveRate = gross > 0 ? (seTax / gross) * 100 : 0;
-  const seTaxDeduction = seTax * 0.5;
-  return { gross, totalExp, totalMiles, mileDeduction, netProfit, seBase, seTax, effectiveRate, seTaxDeduction, paidCount: paidOrders.length };
+function updateConnectivity() {
+  const online = navigator.onLine;
+  const netDot = document.getElementById('net-dot');
+  const netLabel = document.getElementById('net-label');
+  const netCopy = document.getElementById('net-copy');
+  const syncChip = document.getElementById('sync-chip');
+  const saveChip = document.getElementById('save-chip');
+  const queueChip = document.getElementById('queue-chip');
+  const pending = (state.syncQueue || []).length;
+
+  netDot.className = 'status-dot' + (online ? '' : ' offline');
+  netLabel.textContent = online ? 'Connected, still offline-safe' : 'Offline-ready local app';
+  netCopy.textContent = online
+    ? 'Your data is still saving locally. Automatic cloud sync needs a connected sync target.'
+    : 'Works without service. Changes save on this device immediately.';
+  syncChip.className = 'status-chip ' + (online ? 'warn' : 'muted');
+  syncChip.textContent = online ? 'Sync target not connected' : 'Offline mode active';
+  saveChip.textContent = saveLabel(state.meta && state.meta.lastLocalSave);
+  queueChip.textContent = pending + ' pending sync changes';
+  queueChip.className = 'status-chip ' + (pending ? 'warn' : 'muted');
 }
 
-// ── UI UPDATE ──────────────────────────────────────────────
-function updateAll() {
-  const t = calcTotals();
-
-  // KPI Dashboard
-  const profitEl = document.getElementById('kpi-profit');
-  profitEl.textContent = fmtSigned(t.netProfit);
-  profitEl.className = 'kpi-val ' + (t.netProfit >= 0 ? 'lime' : 'red');
-
-  document.getElementById('kpi-tax').textContent = fmt(t.seTax);
-  document.getElementById('kpi-miles').textContent = fmtMi(t.totalMiles);
-  document.getElementById('kpi-miles-sub').textContent = fmt(t.mileDeduction) + ' deduction';
-  document.getElementById('kpi-gross').textContent = fmt(t.gross);
-  document.getElementById('kpi-wo-count').textContent = t.paidCount + ' paid order' + (t.paidCount !== 1 ? 's' : '');
-  document.getElementById('kpi-exp').textContent = fmt(t.totalExp);
-  document.getElementById('kpi-exp-count').textContent = state.expenses.length + ' entr' + (state.expenses.length === 1 ? 'y' : 'ies');
-  document.getElementById('kpi-qtr').textContent = fmt(t.seTax / 4);
-
-  // Tax Panel
-  document.getElementById('tx-gross').textContent = fmt(t.gross);
-  document.getElementById('tx-deductions').textContent = fmt(t.totalExp + t.mileDeduction);
-  const txNet = document.getElementById('tx-net');
-  txNet.textContent = fmtSigned(t.netProfit);
-  txNet.style.color = t.netProfit >= 0 ? 'var(--lime)' : 'var(--red)';
-  document.getElementById('tx-base').textContent = fmt(t.seBase);
-  document.getElementById('tx-se').textContent = fmt(t.seTax);
-  document.getElementById('tx-rate').textContent = t.effectiveRate.toFixed(2) + '%';
-  const qtr = t.seTax / 4;
-  ['q1','q2','q3','q4'].forEach(id => document.getElementById(id).textContent = fmt(qtr));
-  document.getElementById('tx-exp-sub').textContent = fmt(t.totalExp);
-  document.getElementById('tx-mi-count2').textContent = fmtMi(t.totalMiles);
-  document.getElementById('tx-mi-sub').textContent = fmt(t.mileDeduction);
-  document.getElementById('tx-total-ded').textContent = fmt(t.totalExp + t.mileDeduction);
-  document.getElementById('tx-se-ded').textContent = fmt(t.seTaxDeduction);
-
-  // Counts
-  document.getElementById('ledger-count').textContent = state.workOrders.length + ' entries';
-  document.getElementById('exp-count').textContent = state.expenses.length + ' entries';
-  const miCount = state.mileage.reduce((s,m)=>s+(+m.miles||0),0);
-  document.getElementById('mi-count').textContent = state.mileage.length + ' trips \u2014 ' + fmtMi(miCount) + ' mi total';
-
-  renderDashRecent();
-  renderDashMiles();
-  renderLedger();
-  renderExpenses();
-  renderMileage();
-  updateStatusBar();
-  saveState();
+function populateSelect(id, values) {
+  document.getElementById(id).innerHTML = values.map(value => '<option>' + safeText(value) + '</option>').join('');
 }
 
-// ── RENDERS ────────────────────────────────────────────────
-function renderDashRecent() {
-  const el = document.getElementById('dash-recent');
-  const recent = [...state.workOrders].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
-  if (!recent.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">&#9632;</div>No work orders logged yet. Go to Ledger to add one.</div>';
+function populateYearSelect() {
+  const current = new Date().getFullYear();
+  const values = [];
+  for (let year = current + 1; year >= current - 3; year -= 1) values.push(String(year));
+  populateSelect('set-year', values);
+}
+
+function refreshProjectLinkSelects() {
+  const items = [{ id:'', label:'Not linked' }].concat(state.projects.map(project => ({ id: project.id, label: project.client + ' · ' + project.title })));
+  const html = items.map(item => '<option value="' + safeText(item.id) + '">' + safeText(item.label) + '</option>').join('');
+  ['exp-project', 'mi-project'].forEach(id => { document.getElementById(id).innerHTML = html; });
+}
+
+function updateDashboard() {
+  const t = totals();
+  document.getElementById('kpi-collected').textContent = currency(t.collected);
+  document.getElementById('kpi-pipeline').textContent = currency(t.pipeline);
+  document.getElementById('kpi-ar').textContent = currency(t.outstanding);
+  document.getElementById('kpi-net').textContent = currency(t.ownerPayReady);
+
+  const actions = makeActions();
+  document.getElementById('action-count').textContent = actions.length + ' actions';
+  document.getElementById('action-list').innerHTML = actions.length ? actions.map(action => `
+    <div class="action-item">
+      <div class="flag ${action.level}"></div>
+      <div><strong>${safeText(action.title)}</strong><div class="meta">${safeText(action.note)}</div></div>
+      <div class="num">${safeText(action.amount)}</div>
+    </div>`).join('') : '<div class="empty">No urgent actions right now. That usually means follow-up, scheduling, and collections are in a healthy spot.</div>';
+
+  const today = todayProjects();
+  document.getElementById('today-list').innerHTML = today.length ? today.map(project => `
+    <div class="today-item">
+      <strong>${safeText(project.client)} · ${safeText(project.title)}</strong>
+      <div class="meta">${safeText(project.scheduledDate || 'No date yet')} · ${safeText(project.location || 'Location not set')}</div>
+      <div class="meta" style="margin-top:6px">${safeText(project.nextAction || 'No next action set')}</div>
+    </div>`).join('') : '<div class="empty">Nothing scheduled yet. Add jobs with a scheduled date to turn this into a real day board.</div>';
+
+  document.getElementById('board').innerHTML = BOARD_STAGES.map(stage => {
+    const summary = stageSummary(stage);
+    return `<div class="stage-col"><h4><span>${safeText(stage)}</span><span class="stage-count">${summary.items.length}</span></h4><div class="stage-stack">${summary.items.length ? summary.items.slice(0, 4).map(project => `<div class="stage-card"><strong>${safeText(project.client)}</strong><p>${safeText(project.title)}</p><p class="num" style="margin-top:8px">${currency(project.estimate)}</p></div>`).join('') : '<div class="meta">No jobs here.</div>'}</div></div>`;
+  }).join('');
+
+  const receivables = state.projects.map(project => ({ project, outstanding: projectOutstanding(project) })).filter(item => item.outstanding > 0).sort((a, b) => (isPast(a.project.dueDate) ? 0 : 1) - (isPast(b.project.dueDate) ? 0 : 1) || b.outstanding - a.outstanding);
+  const agingMarkup = receivables.length ? receivables.slice(0, 5).map(item => `<div class="aging-item"><strong>${safeText(item.project.client)} · ${safeText(item.project.title)}</strong><div class="meta">${safeText(item.project.dueDate || 'No due date')} · ${isPast(item.project.dueDate) ? 'Overdue' : 'Open'}</div><div class="num" style="margin-top:8px">${currency(item.outstanding)}</div></div>`).join('') : '<div class="empty">No open receivables. Paid work should end up here as zero and then disappear.</div>';
+  document.getElementById('aging-list').innerHTML = agingMarkup;
+  document.getElementById('receivable-list').innerHTML = agingMarkup;
+
+  document.getElementById('ops-list').innerHTML = `
+    <div class="mini-item"><strong>${state.projects.filter(project => project.stage !== 'Paid').length} active pipeline jobs</strong><div class="meta">${state.projects.filter(project => project.stage === 'Estimate Sent').length} quotes out · ${state.projects.filter(project => project.stage === 'Active').length} jobs in progress</div></div>
+    <div class="mini-item"><strong>${number1(t.mileageMiles)} miles tracked</strong><div class="meta">${currency(t.mileageDeduction)} current deduction at ${currency(state.settings.mileageRate).replace('.00', '')}/mile</div></div>
+    <div class="mini-item"><strong>${state.expenses.length} overhead entries</strong><div class="meta">${currency(t.expenses)} in operating expenses logged so far</div></div>`;
+}
+
+function renderProjects() {
+  document.getElementById('project-count').textContent = state.projects.length + ' projects';
+  const connected = state.projects.filter(project => isConnectedSource(project.source)).slice(0, 4);
+  const local = state.projects.filter(project => !isConnectedSource(project.source) || project.source === 'Local / Manual' || project.source === 'Direct Client').slice(0, 4);
+  const leads = state.projects.filter(project => isLeadSource(project.source) && ['Inquiry','Estimate Sent'].includes(project.stage)).slice(0, 4);
+  const opportunities = state.projects.filter(project => ['Inquiry','Estimate Sent','Deposit Needed'].includes(project.stage)).slice(0, 4);
+
+  document.getElementById('lane-board').innerHTML = [
+    { title: 'Connected Jobs', items: connected, empty: 'No platform-linked jobs yet.' },
+    { title: 'Local Jobs', items: local, empty: 'No local-only jobs yet.' },
+    { title: 'Leads', items: leads, empty: 'No lead-source opportunities yet.' },
+    { title: 'Opportunities', items: opportunities, empty: 'No open opportunities right now.' }
+  ].map(lane => `
+    <div class="card lane-card">
+      <h4>${lane.title}</h4>
+      <div class="lane-list">
+        ${lane.items.length ? lane.items.map(project => `
+          <div class="lane-item">
+            <strong>${safeText(project.client)}</strong>
+            <div class="meta">${safeText(project.title)}</div>
+            <div class="fine">${safeText(project.source || 'Local / Manual')} · ${safeText(project.stage)}</div>
+          </div>
+        `).join('') : `<div class="empty">${lane.empty}</div>`}
+      </div>
+    </div>
+  `).join('');
+
+  if (!state.projects.length) {
+    document.getElementById('project-cards').innerHTML = '<div class="empty">No projects yet. Start with a real inquiry, service call, or quote. This app gets better as soon as stage and next action become part of your habit.</div>';
+    document.getElementById('project-table').innerHTML = '<tr><td colspan="10"><div class="empty">The jobs table will populate here after the first project is saved.</div></td></tr>';
     return;
   }
-  el.innerHTML = '<table><thead><tr><th>Date</th><th>WO ID</th><th>Platform</th><th>Amount</th><th>Status</th></tr></thead><tbody>' +
-    recent.map(o => `<tr>
-      <td>${o.date}</td>
-      <td style="color:var(--text2)">${esc(o.id)}</td>
-      <td>${esc(o.platform)}</td>
-      <td class="td-mono" style="color:var(--lime)">${fmt(o.amount)}</td>
-      <td><span class="badge ${badgeClass(o.status)}">${o.status}</span></td>
-    </tr>`).join('') + '</tbody></table>';
-}
-
-function renderDashMiles() {
-  const el = document.getElementById('dash-miles');
-  const recent = [...state.mileage].slice(0, 5);
-  if (!recent.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">&#9632;</div>No trips logged yet.</div>';
-    return;
-  }
-  el.innerHTML = '<table><thead><tr><th>Date</th><th>Miles</th><th>Deduction</th><th>Purpose</th></tr></thead><tbody>' +
-    recent.map(m => `<tr>
-      <td>${m.date}</td>
-      <td class="td-mono">${fmtMi(m.miles)}</td>
-      <td class="td-mono" style="color:var(--lime)">${fmt(m.miles * IRS_RATE)}</td>
-      <td style="color:var(--text2)">${esc(m.purpose)}</td>
-    </tr>`).join('') + '</tbody></table>';
-}
-
-function renderLedger() {
-  const el = document.getElementById('ledger-table');
-  if (!state.workOrders.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">&#9632;</div>No work orders yet.</div>';
-    return;
-  }
-  el.innerHTML = '<table><thead><tr><th>Date</th><th>WO ID</th><th>Platform</th><th>Description</th><th>Amount</th><th>Status</th><th></th></tr></thead><tbody>' +
-    state.workOrders.map((o, i) => `<tr>
-      <td>${o.date}</td>
-      <td style="color:var(--text2)">${esc(o.id)}</td>
-      <td>${esc(o.platform)}</td>
-      <td style="color:var(--text2);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(o.desc || '--')}</td>
-      <td class="td-mono" style="color:var(--lime)">${fmt(o.amount)}</td>
-      <td><span class="badge ${badgeClass(o.status)}">${o.status}</span></td>
-      <td><button class="del-btn" onclick="confirmDel('wo',${i})">&times;</button></td>
-    </tr>`).join('') + '</tbody></table>';
+  document.getElementById('project-cards').innerHTML = state.projects.map(project => `
+    <div class="project-card">
+      <div class="project-head">
+        <div><strong>${safeText(project.client)}</strong><div class="meta">${safeText(project.title)}</div><div class="fine" style="margin-top:4px">${safeText(project.source || 'Local / Manual')}${project.sourceJobId ? ' · ' + safeText(project.sourceJobId) : ''}</div></div>
+        <div style="display:grid;gap:8px;justify-items:end"><span class="pill ${projectPillClass(project.stage)}">${safeText(project.stage)}</span><span class="pill ${priorityClass(project.priority)}">${safeText(project.priority)} priority</span></div>
+      </div>
+      <div class="project-metrics">
+        <div class="mini-metric"><span>Estimate</span><strong>${currency(project.estimate)}</strong></div>
+        <div class="mini-metric"><span>Outstanding</span><strong>${currency(projectOutstanding(project))}</strong></div>
+        <div class="mini-metric"><span>Margin</span><strong>${currency(projectMargin(project))}</strong></div>
+      </div>
+      <div class="stack"><div class="muted">${safeText(project.location || 'No site listed')}</div><div class="fine">${safeText(project.nextAction || 'No next action set')}</div></div>
+      <div class="btn-row" style="margin-top:0"><button class="btn btn-muted" onclick="editProject('${project.id}')">Edit</button><button class="btn btn-ghost" onclick="advanceStage('${project.id}')">Advance Stage</button><button class="btn btn-danger" onclick="confirmDelete('project','${project.id}')">Delete</button></div>
+    </div>`).join('');
+  document.getElementById('project-table').innerHTML = state.projects.map(project => `
+    <tr>
+      <td><div class="stack"><strong>${safeText(project.client)} · ${safeText(project.title)}</strong><span class="fine">${safeText(project.trade)} · ${safeText(project.contact || 'No contact')}</span></div></td>
+      <td><div class="stack"><span>${safeText(project.source || 'Local / Manual')}</span><span class="fine">${safeText(project.sourceStatus || project.sourceJobId || '—')}</span></div></td>
+      <td><span class="pill ${projectPillClass(project.stage)}">${safeText(project.stage)}</span></td>
+      <td>${safeText(project.scheduledDate || '—')}</td>
+      <td class="num">${currency(project.estimate)}</td>
+      <td class="num">${currency(project.invoiced)}</td>
+      <td class="num">${currency(project.paid)}</td>
+      <td class="num">${currency(projectOutstanding(project))}</td>
+      <td class="num">${currency(projectMargin(project))}</td>
+      <td>${safeText(project.nextAction || '—')}</td>
+      <td><button class="btn btn-ghost" onclick="editProject('${project.id}')">Edit</button></td>
+    </tr>`).join('');
 }
 
 function renderExpenses() {
-  const el = document.getElementById('exp-table');
-  if (!state.expenses.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">&#9632;</div>No expenses logged yet.</div>';
-    return;
-  }
-  el.innerHTML = '<table><thead><tr><th>Date</th><th>Vendor</th><th>Category</th><th>Amount</th><th></th></tr></thead><tbody>' +
-    state.expenses.map((e, i) => `<tr>
-      <td>${e.date}</td>
-      <td>${esc(e.vendor)}</td>
-      <td><span class="badge badge-cat">${esc(e.category)}</span></td>
-      <td class="td-mono" style="color:var(--red)">${fmt(e.amount)}</td>
-      <td><button class="del-btn" onclick="confirmDel('exp',${i})">&times;</button></td>
-    </tr>`).join('') + '</tbody></table>';
+  document.getElementById('expense-table').innerHTML = state.expenses.length ? state.expenses.map(expense => `
+    <tr>
+      <td>${safeText(expense.date)}</td>
+      <td>${safeText(expense.vendor)}</td>
+      <td>${safeText(expense.category)}</td>
+      <td>${safeText(projectLabel(expense.projectId) || '—')}</td>
+      <td class="num">${currency(expense.amount)}</td>
+      <td>${safeText(expense.notes || '—')}</td>
+      <td><button class="btn btn-danger" onclick="confirmDelete('expense','${expense.id}')">Delete</button></td>
+    </tr>`).join('') : '<tr><td colspan="7"><div class="empty">No expenses yet. This section is for overhead and non-job costs that still hit the business.</div></td></tr>';
 }
 
 function renderMileage() {
-  const el = document.getElementById('mi-table');
-  if (!state.mileage.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">&#9632;</div>No trips logged yet.</div>';
-    return;
-  }
-  el.innerHTML = '<table><thead><tr><th>Date</th><th>Start</th><th>End</th><th>Miles</th><th>Deduction</th><th>Purpose</th><th>Route</th><th>WO</th><th></th></tr></thead><tbody>' +
-    state.mileage.map((m, i) => `<tr>
-      <td>${m.date}</td>
-      <td class="td-mono">${(+m.start).toLocaleString()}</td>
-      <td class="td-mono">${(+m.end).toLocaleString()}</td>
-      <td class="td-mono">${fmtMi(m.miles)}</td>
-      <td class="td-mono" style="color:var(--lime)">${fmt(m.miles * IRS_RATE)}</td>
-      <td style="color:var(--text2);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(m.purpose)}</td>
-      <td style="color:var(--text3)">${esc(m.route || '--')}</td>
-      <td style="color:var(--text3)">${esc(m.wo || '--')}</td>
-      <td><button class="del-btn" onclick="confirmDel('mi',${i})">&times;</button></td>
-    </tr>`).join('') + '</tbody></table>';
+  document.getElementById('mileage-table').innerHTML = state.mileage.length ? state.mileage.map(entry => `
+    <tr>
+      <td>${safeText(entry.date)}</td>
+      <td>${safeText(projectLabel(entry.projectId) || '—')}</td>
+      <td class="num">${number1(entry.miles)}</td>
+      <td class="num">${currency(entry.miles * (+state.settings.mileageRate || 0))}</td>
+      <td>${safeText(entry.purpose)}</td>
+      <td>${safeText(entry.route || '—')}</td>
+      <td><button class="btn btn-danger" onclick="confirmDelete('mileage','${entry.id}')">Delete</button></td>
+    </tr>`).join('') : '<tr><td colspan="7"><div class="empty">No mileage trips logged yet. Enter a date, odometer start and end, and the reason for the drive.</div></td></tr>';
 }
 
-// ── ADD ACTIONS ────────────────────────────────────────────
-function addWorkOrder() {
-  const id     = document.getElementById('wo-id').value.trim();
-  const amount = parseFloat(document.getElementById('wo-amount').value);
-  const date   = document.getElementById('wo-date').value;
-  const plat   = document.getElementById('wo-platform').value;
-  const status = document.getElementById('wo-status').value;
-  const desc   = document.getElementById('wo-desc').value.trim();
-
-  if (!id || !date || isNaN(amount) || amount <= 0) {
-    showToast('Fill in WO ID, Date, and a valid Amount.', 'error');
-    return;
-  }
-
-  state.workOrders.unshift({ id, platform: plat, amount, date, status, desc });
-  ['wo-id','wo-amount','wo-desc'].forEach(f => document.getElementById(f).value = '');
-  document.getElementById('wo-date').value = today();
-  showToast('Work order ' + id + ' added.');
-  updateAll();
+function renderMoney() {
+  const t = totals();
+  document.getElementById('money-invoiced').textContent = currency(t.invoiced);
+  document.getElementById('money-costs').textContent = currency(t.directCosts);
+  document.getElementById('money-expenses').textContent = currency(t.expenses);
+  document.getElementById('money-margin').textContent = currency(t.grossMargin);
 }
 
-function addExpense() {
-  const date   = document.getElementById('exp-date').value;
-  const vendor = document.getElementById('exp-vendor').value.trim();
-  const amount = parseFloat(document.getElementById('exp-amount').value);
-  const cat    = document.getElementById('exp-cat').value;
-
-  if (!date || !vendor || isNaN(amount) || amount <= 0) {
-    showToast('Fill in Date, Vendor, and a valid Amount.', 'error');
-    return;
-  }
-
-  state.expenses.unshift({ date, vendor, amount, category: cat });
-  ['exp-vendor','exp-amount'].forEach(f => document.getElementById(f).value = '');
-  document.getElementById('exp-date').value = today();
-  showToast('Expense logged: ' + fmt(amount) + ' at ' + vendor);
-  updateAll();
+function renderTax() {
+  const t = totals();
+  document.getElementById('tax-mileage').textContent = currency(t.mileageDeduction);
+  document.getElementById('tax-net').textContent = currency(t.taxableNet);
+  document.getElementById('tax-se').textContent = currency(t.seTax);
+  document.getElementById('tax-quarter').textContent = currency(t.seTax / 4);
+  const year = +state.settings.taxYear || new Date().getFullYear();
+  const items = [
+    { label:'Q1 reserve target', due:'April 15, ' + year },
+    { label:'Q2 reserve target', due:'June 15, ' + year },
+    { label:'Q3 reserve target', due:'September 15, ' + year },
+    { label:'Q4 reserve target', due:'January 15, ' + (year + 1) }
+  ];
+  document.getElementById('quarter-list').innerHTML = items.map(item => `<div class="mini-item"><strong>${safeText(item.label)}</strong><div class="meta">${safeText(item.due)}</div><div class="num" style="margin-top:8px">${currency(t.seTax / 4)}</div></div>`).join('');
 }
 
-function addMileage() {
-  const date    = document.getElementById('mi-date').value;
-  const start   = parseFloat(document.getElementById('mi-start').value);
-  const end     = parseFloat(document.getElementById('mi-end').value);
-  const purpose = document.getElementById('mi-purpose').value.trim();
-  const route   = document.getElementById('mi-route').value.trim();
-  const wo      = document.getElementById('mi-wo').value.trim();
-
-  if (!date || isNaN(start) || isNaN(end) || !purpose) {
-    showToast('Date, Odometer readings, and Purpose are required.', 'error');
-    return;
-  }
-  if (end <= start) {
-    showToast('Odometer End must be greater than Start.', 'error');
-    return;
-  }
-
-  const miles = parseFloat((end - start).toFixed(1));
-  state.mileage.unshift({ date, start, end, miles, purpose, route, wo });
-  ['mi-start','mi-end','mi-purpose','mi-route','mi-wo'].forEach(f => document.getElementById(f).value = '');
-  document.getElementById('mi-date').value = today();
-  document.getElementById('mi-preview').style.display = 'none';
-  showToast(fmtMi(miles) + ' mi logged = ' + fmt(miles * IRS_RATE) + ' deduction');
-  updateAll();
+function renderSettings() {
+  document.getElementById('set-name').value = state.settings.businessName || '';
+  document.getElementById('set-owner').value = state.settings.owner || '';
+  document.getElementById('set-trade').value = state.settings.primaryTrade || DEFAULT_SETTINGS.primaryTrade;
+  document.getElementById('set-year').value = state.settings.taxYear || DEFAULT_SETTINGS.taxYear;
+  document.getElementById('set-mile-rate').value = state.settings.mileageRate;
+  document.getElementById('set-margin-target').value = state.settings.marginTarget;
+  document.getElementById('set-terms').value = state.settings.paymentTerms || '';
+  document.getElementById('storage-note').textContent = 'Storage mode: browser localStorage · ' + (state.settings.businessName || 'Unnamed business');
+  renderConnectors();
 }
 
-// ── MILEAGE PREVIEW ────────────────────────────────────────
-function previewMiles() {
-  const s = parseFloat(document.getElementById('mi-start').value);
-  const e = parseFloat(document.getElementById('mi-end').value);
-  const prev = document.getElementById('mi-preview');
-  if (!isNaN(s) && !isNaN(e) && e > s) {
-    const miles = (e - s).toFixed(1);
-    const ded   = (miles * IRS_RATE).toFixed(2);
-    prev.style.display = 'block';
-    prev.textContent = '\u25b6 ' + miles + ' miles \u00d7 $0.725 = $' + ded + ' deduction';
+function connectorPill(status) {
+  if (status === 'connected') return 'active';
+  if (status === 'available') return 'scheduled';
+  if (status === 'planned') return 'estimate';
+  return 'inquiry';
+}
+
+function renderConnectors() {
+  const grid = document.getElementById('connector-grid');
+  if (!grid) return;
+  grid.innerHTML = state.connectors.map(connector => `
+    <div class="connector-card">
+      <div class="connector-top">
+        <div class="connector-meta">
+          <strong>${safeText(connector.platform)}</strong>
+          <span class="fine">${safeText(connector.lane)}</span>
+        </div>
+        <span class="pill ${connectorPill(connector.status)}">${safeText(connector.status)}</span>
+      </div>
+      <div class="meta">${safeText(connector.note)}</div>
+      <div class="mini-list" style="gap:8px">
+        <div class="mini-item"><strong>Connection Mode</strong><div class="meta">${safeText(connector.mode)}</div></div>
+        <div class="mini-item"><strong>Planned Scope</strong><div class="meta">${safeText(connector.scopes)}</div></div>
+        <div class="mini-item"><strong>Account</strong><div class="meta">${safeText(connector.accountLabel || 'Not connected')}</div><div class="fine">${connector.lastSync ? 'Last sync: ' + safeText(connector.lastSync) : 'No sync history yet'}</div></div>
+      </div>
+      <div class="connector-actions">
+        <button class="btn btn-muted" onclick="toggleConnector('${connector.platform}')">${connector.status === 'connected' ? 'Disconnect Demo' : 'Mark Connected'}</button>
+        <button class="btn btn-ghost" onclick="queueConnectorSync('${connector.platform}')">Queue Sync Test</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleConnector(platform) {
+  const connector = state.connectors.find(item => item.platform === platform);
+  if (!connector) return;
+  if (connector.status === 'connected') {
+    connector.status = connector.platform === 'Field Nation' || connector.platform === 'WorkMarket' ? 'available' : 'planned';
+    connector.accountLabel = '';
+    connector.lastSync = '';
+    queueSync('disconnect', 'connector', platform);
+    showToast(platform + ' marked disconnected.');
   } else {
-    prev.style.display = 'none';
+    connector.status = 'connected';
+    connector.accountLabel = 'Demo linked account';
+    connector.lastSync = new Date().toLocaleString('en-US');
+    queueSync('connect', 'connector', platform);
+    showToast(platform + ' marked connected.');
+  }
+  updateAll();
+}
+
+function queueConnectorSync(platform) {
+  const connector = state.connectors.find(item => item.platform === platform);
+  if (!connector) return;
+  connector.lastSync = 'Queued locally';
+  queueSync('sync', 'connector', platform);
+  showToast('Queued a sync test for ' + platform + '.');
+  updateAll();
+}
+
+function updateAll() {
+  state.projects.sort((a, b) => (b.updatedAt || b.createdAt || '').localeCompare(a.updatedAt || a.createdAt || ''));
+  state.expenses.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  state.mileage.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  refreshProjectLinkSelects();
+  updateDashboard();
+  renderProjects();
+  renderExpenses();
+  renderMileage();
+  renderMoney();
+  renderTax();
+  renderSettings();
+  saveState();
+  updateConnectivity();
+}
+
+function readProjectForm() {
+  return {
+    client: document.getElementById('job-client').value.trim(),
+    title: document.getElementById('job-title').value.trim(),
+    trade: document.getElementById('job-trade').value,
+    stage: document.getElementById('job-stage').value,
+    source: document.getElementById('job-source').value,
+    sourceJobId: document.getElementById('job-source-id').value.trim(),
+    sourceStatus: document.getElementById('job-source-status').value.trim(),
+    assignee: document.getElementById('job-assignee').value.trim(),
+    estimate: +document.getElementById('job-estimate').value || 0,
+    invoiced: +document.getElementById('job-invoiced').value || 0,
+    paid: +document.getElementById('job-paid').value || 0,
+    priority: document.getElementById('job-priority').value,
+    depositRequested: +document.getElementById('job-deposit-requested').value || 0,
+    depositReceived: +document.getElementById('job-deposit-received').value || 0,
+    scheduledDate: document.getElementById('job-scheduled').value,
+    dueDate: document.getElementById('job-due').value,
+    materials: +document.getElementById('job-materials').value || 0,
+    labor: +document.getElementById('job-labor').value || 0,
+    subs: +document.getElementById('job-subs').value || 0,
+    location: document.getElementById('job-location').value.trim(),
+    contact: document.getElementById('job-contact').value.trim(),
+    nextAction: document.getElementById('job-next-action').value.trim(),
+    scope: document.getElementById('job-scope').value.trim(),
+    notes: document.getElementById('job-notes').value.trim()
+  };
+}
+
+function saveProject() {
+  const form = readProjectForm();
+  if (!form.client || !form.title) return showToast('Client and project title are required.', true);
+  if (form.paid > form.invoiced && form.invoiced > 0) return showToast('Paid amount cannot exceed invoiced amount.', true);
+  const now = new Date().toISOString();
+  if (editingProjectId) {
+    Object.assign(state.projects.find(item => item.id === editingProjectId), form, { updatedAt: now });
+    queueSync('update', 'project', editingProjectId);
+    showToast('Project updated.');
+  } else {
+    const id = uid('job');
+    state.projects.unshift({ id, createdAt: now, updatedAt: now, ...form });
+    queueSync('create', 'project', id);
+    showToast('Project saved.');
+  }
+  editingProjectId = null;
+  resetProjectForm(false);
+  updateAll();
+}
+
+function resetProjectForm(announce = true) {
+  editingProjectId = null;
+  ['job-client','job-title','job-source-id','job-source-status','job-assignee','job-estimate','job-invoiced','job-paid','job-deposit-requested','job-deposit-received','job-materials','job-labor','job-subs','job-location','job-contact','job-next-action','job-scope','job-notes'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('job-trade').value = state.settings.primaryTrade || DEFAULT_SETTINGS.primaryTrade;
+  document.getElementById('job-stage').value = 'Inquiry';
+  document.getElementById('job-source').value = 'Local / Manual';
+  document.getElementById('job-priority').value = 'Medium';
+  document.getElementById('job-scheduled').value = '';
+  document.getElementById('job-due').value = '';
+  document.getElementById('job-form-mode').textContent = 'Creating a new project';
+  if (announce) showToast('Project form cleared.');
+}
+
+function editProject(id) {
+  const project = state.projects.find(item => item.id === id);
+  if (!project) return;
+  editingProjectId = id;
+  document.getElementById('job-client').value = project.client;
+  document.getElementById('job-title').value = project.title;
+  document.getElementById('job-trade').value = project.trade;
+  document.getElementById('job-stage').value = project.stage;
+  document.getElementById('job-source').value = project.source || 'Local / Manual';
+  document.getElementById('job-source-id').value = project.sourceJobId || '';
+  document.getElementById('job-source-status').value = project.sourceStatus || '';
+  document.getElementById('job-assignee').value = project.assignee || '';
+  document.getElementById('job-estimate').value = project.estimate || '';
+  document.getElementById('job-invoiced').value = project.invoiced || '';
+  document.getElementById('job-paid').value = project.paid || '';
+  document.getElementById('job-priority').value = project.priority;
+  document.getElementById('job-deposit-requested').value = project.depositRequested || '';
+  document.getElementById('job-deposit-received').value = project.depositReceived || '';
+  document.getElementById('job-scheduled').value = project.scheduledDate || '';
+  document.getElementById('job-due').value = project.dueDate || '';
+  document.getElementById('job-materials').value = project.materials || '';
+  document.getElementById('job-labor').value = project.labor || '';
+  document.getElementById('job-subs').value = project.subs || '';
+  document.getElementById('job-location').value = project.location || '';
+  document.getElementById('job-contact').value = project.contact || '';
+  document.getElementById('job-next-action').value = project.nextAction || '';
+  document.getElementById('job-scope').value = project.scope || '';
+  document.getElementById('job-notes').value = project.notes || '';
+  document.getElementById('job-form-mode').textContent = 'Editing ' + project.client + ' · ' + project.title;
+  showPanel('jobs');
+}
+
+function duplicateProject() {
+  if (!editingProjectId) return showToast('Select a project first, then duplicate it.', true);
+  const source = state.projects.find(item => item.id === editingProjectId);
+  const now = new Date().toISOString();
+  const id = uid('job');
+  state.projects.unshift({ ...source, id, stage: 'Inquiry', paid: 0, invoiced: 0, depositReceived: 0, createdAt: now, updatedAt: now });
+  queueSync('create', 'project', id);
+  showToast('Project duplicated as a new inquiry.');
+  updateAll();
+}
+
+function markProjectPaid() {
+  if (!editingProjectId) return showToast('Select a project first, then mark it paid.', true);
+  const project = state.projects.find(item => item.id === editingProjectId);
+  if (!project.invoiced) project.invoiced = project.estimate;
+  project.paid = project.invoiced;
+  project.stage = 'Paid';
+  project.updatedAt = new Date().toISOString();
+  queueSync('update', 'project', project.id);
+  showToast('Project marked paid.');
+  updateAll();
+}
+
+function advanceStage(id) {
+  const project = state.projects.find(item => item.id === id);
+  const index = STAGES.indexOf(project.stage);
+  project.stage = STAGES[Math.min(index + 1, STAGES.length - 1)];
+  project.updatedAt = new Date().toISOString();
+  queueSync('update', 'project', project.id);
+  showToast('Stage advanced to ' + project.stage + '.');
+  updateAll();
+}
+
+function saveExpense() {
+  const expense = {
+    id: uid('exp'),
+    date: document.getElementById('exp-date').value,
+    vendor: document.getElementById('exp-vendor').value.trim(),
+    amount: +document.getElementById('exp-amount').value || 0,
+    category: document.getElementById('exp-category').value,
+    projectId: document.getElementById('exp-project').value,
+    notes: document.getElementById('exp-notes').value.trim()
+  };
+  if (!expense.date || !expense.vendor || expense.amount <= 0) return showToast('Expense date, vendor, and amount are required.', true);
+  state.expenses.unshift(expense);
+  queueSync('create', 'expense', expense.id);
+  ['exp-vendor','exp-amount','exp-notes'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('exp-date').value = todayLocal();
+  document.getElementById('exp-project').value = '';
+  showToast('Expense logged.');
+  updateAll();
+}
+
+function saveMileage() {
+  const start = +document.getElementById('mi-start').value;
+  const end = +document.getElementById('mi-end').value;
+  const entry = {
+    id: uid('mi'),
+    date: document.getElementById('mi-date').value,
+    start,
+    end,
+    miles: +(end - start).toFixed(1),
+    projectId: document.getElementById('mi-project').value,
+    purpose: document.getElementById('mi-purpose').value.trim(),
+    route: document.getElementById('mi-route').value.trim()
+  };
+  if (!entry.date || !entry.purpose || !isFinite(start) || !isFinite(end) || end <= start) return showToast('Mileage requires date, start, end, and business purpose.', true);
+  state.mileage.unshift(entry);
+  queueSync('create', 'mileage', entry.id);
+  ['mi-start','mi-end','mi-purpose','mi-route'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('mi-date').value = todayLocal();
+  document.getElementById('mi-project').value = '';
+  previewMileage();
+  showToast('Mileage logged.');
+  updateAll();
+}
+
+function previewMileage() {
+  const start = +document.getElementById('mi-start').value;
+  const end = +document.getElementById('mi-end').value;
+  const preview = document.getElementById('mi-preview');
+  if (isFinite(start) && isFinite(end) && end > start) {
+    const miles = +(end - start).toFixed(1);
+    preview.textContent = number1(miles) + ' miles · estimated deduction ' + currency(miles * (+state.settings.mileageRate || 0));
+  } else {
+    preview.textContent = 'Enter start and end odometer to preview the deduction.';
   }
 }
 
-// ── RECEIPT VAULT ──────────────────────────────────────────
+function sanitizeFilenamePart(text) {
+  return String(text || '').trim().replace(/\s+/g, '').replace(/[^a-zA-Z0-9_-]/g, '');
+}
+
 function generateFilename() {
-  const date   = document.getElementById('rv-date').value;
+  const date = document.getElementById('rv-date').value;
   const vendor = document.getElementById('rv-vendor').value.trim();
-  const amount = parseFloat(document.getElementById('rv-amount').value);
-  const cat    = document.getElementById('rv-cat').value;
-
-  if (!date || !vendor || isNaN(amount) || amount < 0) {
-    showToast('Fill in all fields to generate filename.', 'error');
-    return;
-  }
-
-  const cleanVendor = vendor.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
-  const cleanAmt    = amount.toFixed(2);
-  const cleanCat    = cat.replace(/\s+/g, '').replace(/[^a-zA-Z0-9&]/g, '').replace('&','');
-  const filename    = date + '_' + cleanVendor + '_' + cleanAmt + '_' + cleanCat + '.pdf';
-
-  document.getElementById('rv-name').textContent = filename;
-  document.getElementById('rv-output').style.display = 'block';
+  const amount = +document.getElementById('rv-amount').value;
+  const category = document.getElementById('rv-category').value;
+  if (!date || !vendor || amount < 0) return showToast('Receipt date, vendor, and amount are required.', true);
+  document.getElementById('rv-output').textContent = date + '_' + sanitizeFilenamePart(vendor) + '_' + amount.toFixed(2) + '_' + sanitizeFilenamePart(category) + '.pdf';
+  showToast('Filename generated.');
 }
 
 function copyFilename() {
-  const name = document.getElementById('rv-name').textContent;
-  const copied = document.getElementById('rv-copied');
-  const doShow = () => {
-    copied.style.display = 'inline';
-    setTimeout(() => copied.style.display = 'none', 2500);
-    showToast('Filename copied to clipboard.');
-  };
-  if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(name).then(doShow).catch(() => fallbackCopy(name, doShow));
-  } else {
-    fallbackCopy(name, doShow);
-  }
+  const text = document.getElementById('rv-output').textContent;
+  if (!text || text === 'No filename generated yet.') return showToast('Generate a filename first.', true);
+  if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text).then(() => showToast('Filename copied.'));
+  const area = document.createElement('textarea');
+  area.value = text;
+  area.style.position = 'fixed';
+  area.style.left = '-9999px';
+  document.body.appendChild(area);
+  area.select();
+  document.execCommand('copy');
+  area.remove();
+  showToast('Filename copied.');
 }
 
-function fallbackCopy(text, cb) {
-  const ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px';
-  document.body.appendChild(ta);
-  ta.select();
-  try { document.execCommand('copy'); cb(); } catch(e) {}
-  document.body.removeChild(ta);
-}
-
-function logReceiptAsExpense() {
-  const date   = document.getElementById('rv-date').value;
+function receiptToExpense() {
   const vendor = document.getElementById('rv-vendor').value.trim();
-  const amount = parseFloat(document.getElementById('rv-amount').value);
-  const cat    = document.getElementById('rv-cat').value;
-  if (!date || !vendor || isNaN(amount) || amount <= 0) { showToast('Complete the receipt form first.', 'error'); return; }
-  state.expenses.unshift({ date, vendor, amount, category: cat });
-  showToast('Receipt also logged as expense.');
+  const amount = +document.getElementById('rv-amount').value;
+  const date = document.getElementById('rv-date').value;
+  const category = document.getElementById('rv-category').value;
+  if (!vendor || amount <= 0 || !date) return showToast('Complete the receipt fields first.', true);
+  const id = uid('exp');
+  state.expenses.unshift({ id, date, vendor, amount, category, projectId: '', notes: 'Logged from receipt vault' });
+  queueSync('create', 'expense', id);
+  showToast('Receipt logged as expense.');
   updateAll();
 }
 
-// ── SETTINGS ───────────────────────────────────────────────
 function saveSettings() {
-  state.settings.name     = document.getElementById('set-name').value;
-  state.settings.ein      = document.getElementById('set-ein').value;
-  state.settings.platform = document.getElementById('set-platform').value;
-  state.settings.year     = document.getElementById('set-year').value;
-  saveState();
-  updateStatusBar();
+  state.settings = {
+    businessName: document.getElementById('set-name').value.trim(),
+    owner: document.getElementById('set-owner').value.trim(),
+    primaryTrade: document.getElementById('set-trade').value,
+    taxYear: document.getElementById('set-year').value,
+    mileageRate: +document.getElementById('set-mile-rate').value || DEFAULT_SETTINGS.mileageRate,
+    marginTarget: +document.getElementById('set-margin-target').value || DEFAULT_SETTINGS.marginTarget,
+    paymentTerms: document.getElementById('set-terms').value.trim() || DEFAULT_SETTINGS.paymentTerms
+  };
+  queueSync('update', 'settings', 'business-profile');
+  document.getElementById('job-trade').value = state.settings.primaryTrade;
+  previewMileage();
+  showToast('Settings saved.');
+  updateAll();
 }
 
-function loadSettingsUI() {
-  document.getElementById('set-name').value     = state.settings.name || '';
-  document.getElementById('set-ein').value      = state.settings.ein || '';
-  document.getElementById('set-platform').value = state.settings.platform || 'WorkMarket';
-  document.getElementById('set-year').value     = state.settings.year || '2026';
+function downloadFile(filename, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 300);
 }
 
-// ── STATUS BAR ─────────────────────────────────────────────
-function updateStatusBar() {
-  const d = new Date();
-  document.getElementById('sb-date').textContent =
-    d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' }) +
-    ' ' + d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
-  const name = state.settings.name;
-  document.getElementById('sb-name').textContent = name ? '// ' + name : '';
-}
-setInterval(updateStatusBar, 30000);
-
-// ── EXPORT CSV ─────────────────────────────────────────────
-function escCSV(v) {
-  const s = String(v == null ? '' : v);
-  if (s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r')) {
-    return '"' + s.replace(/"/g, '""') + '"';
+function downloadTemplate(type) {
+  let csv = '';
+  let filename = '';
+  if (type === 'fieldnation') {
+    filename = 'FieldNation_Import_Template.csv';
+    csv = 'client,title,trade,stage,source,sourceJobId,sourceStatus,assignee,estimate,invoiced,paid,scheduledDate,dueDate,location,contact,nextAction,scope,notes\n';
+    csv += 'Example MSP,Router swap,Network / Low Voltage,Inquiry,Field Nation,FN-12345,Applied,You,450,0,0,2026-04-12,2026-04-18,Denver CO,Dispatch,Confirm site contact,Router replacement,Imported manually from Field Nation\n';
+  } else {
+    filename = 'WorkMarket_Import_Template.csv';
+    csv = 'client,title,trade,stage,source,sourceJobId,sourceStatus,assignee,estimate,invoiced,paid,scheduledDate,dueDate,location,contact,nextAction,scope,notes\n';
+    csv += 'Example Retail,POS refresh,Electrical,Scheduled,WorkMarket,WM-9876,Assigned,Crew A,850,0,0,2026-04-14,2026-04-20,Boulder CO,Buyer,Confirm arrival window,Swap failing run,Imported manually from WorkMarket\n';
   }
-  return s;
+  downloadFile(filename, csv, 'text/csv;charset=utf-8');
+  showToast('Template downloaded.');
 }
 
-function exportCSV() {
-  const t = calcTotals();
-  const ts = new Date().toISOString();
-  let csv = 'FIELD-OPS CONTRACTOR OS // EXPORT\r\n';
-  csv += 'Generated,' + ts + '\r\n';
-  if (state.settings.name) csv += 'Contractor,' + escCSV(state.settings.name) + '\r\n';
-  csv += 'Tax Year,' + state.settings.year + '\r\n\r\n';
-
-  csv += 'SUMMARY\r\n';
-  csv += 'Gross Income (Paid WOs),' + t.gross.toFixed(2) + '\r\n';
-  csv += 'Total Business Expenses,' + t.totalExp.toFixed(2) + '\r\n';
-  csv += 'Total Miles,' + t.totalMiles.toFixed(1) + '\r\n';
-  csv += 'Mileage Deduction (@ $0.725/mi),' + t.mileDeduction.toFixed(2) + '\r\n';
-  csv += 'Net Profit,' + t.netProfit.toFixed(2) + '\r\n';
-  csv += 'SE Taxable Base (Net x 92.35%),' + t.seBase.toFixed(2) + '\r\n';
-  csv += 'SE Tax Liability (Base x 15.3%),' + t.seTax.toFixed(2) + '\r\n';
-  csv += 'Quarterly Estimated Payment,' + (t.seTax / 4).toFixed(2) + '\r\n\r\n';
-
-  csv += 'WORK ORDERS\r\n';
-  csv += 'Date,WO ID,Platform,Description,Amount,Status\r\n';
-  state.workOrders.forEach(o => {
-    csv += [o.date, o.id, o.platform, o.desc || '', o.amount, o.status].map(escCSV).join(',') + '\r\n';
-  });
-
-  csv += '\r\nEXPENSES\r\n';
-  csv += 'Date,Vendor,Category,Amount\r\n';
-  state.expenses.forEach(e => {
-    csv += [e.date, e.vendor, e.category, e.amount].map(escCSV).join(',') + '\r\n';
-  });
-
-  csv += '\r\nMILEAGE LOG\r\n';
-  csv += 'Date,Odometer Start,Odometer End,Miles,Deduction ($),Purpose,Route,WO ID\r\n';
-  state.mileage.forEach(m => {
-    csv += [m.date, m.start, m.end, m.miles, (m.miles * IRS_RATE).toFixed(2), m.purpose, m.route || '', m.wo || ''].map(escCSV).join(',') + '\r\n';
-  });
-
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = 'FieldOps_' + (state.settings.name || 'Export').replace(/\s+/g,'_') + '_' + new Date().toISOString().slice(0,10) + '.csv';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => { URL.revokeObjectURL(url); document.body.removeChild(a); }, 300);
-  showToast('CSV exported.');
+function triggerJobsImport() {
+  document.getElementById('jobs-import-file').click();
 }
 
-// ── EXPORT / IMPORT JSON ───────────────────────────────────
-function exportJSON() {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = 'FieldOps_Backup_' + new Date().toISOString().slice(0,10) + '.json';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => { URL.revokeObjectURL(url); document.body.removeChild(a); }, 300);
-  showToast('JSON backup exported.');
+function parseCSV(text) {
+  const rows = [];
+  let row = [];
+  let cell = '';
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i += 1) {
+    const char = text[i];
+    const next = text[i + 1];
+    if (char === '"' && inQuotes && next === '"') {
+      cell += '"';
+      i += 1;
+      continue;
+    }
+    if (char === '"') {
+      inQuotes = !inQuotes;
+      continue;
+    }
+    if (char === ',' && !inQuotes) {
+      row.push(cell);
+      cell = '';
+      continue;
+    }
+    if ((char === '\n' || char === '\r') && !inQuotes) {
+      if (char === '\r' && next === '\n') i += 1;
+      row.push(cell);
+      if (row.some(value => value !== '')) rows.push(row);
+      row = [];
+      cell = '';
+      continue;
+    }
+    cell += char;
+  }
+  if (cell.length || row.length) {
+    row.push(cell);
+    if (row.some(value => value !== '')) rows.push(row);
+  }
+  return rows;
 }
 
-function importJSON() {
-  document.getElementById('import-file').click();
-}
-
-function handleImport(e) {
-  const file = e.target.files[0];
+function handleJobsImport(event) {
+  const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = evt => {
+  reader.onload = loaded => {
     try {
-      const imported = JSON.parse(evt.target.result);
-      if (!imported.workOrders && !imported.expenses && !imported.mileage) {
-        showToast('Invalid backup file.', 'error');
-        return;
-      }
-      state = Object.assign({ workOrders:[], expenses:[], mileage:[], settings:{} }, imported);
-      state.settings = Object.assign({ name:'', ein:'', platform:'WorkMarket', year:'2026' }, state.settings);
-      saveState();
-      loadSettingsUI();
+      const rows = parseCSV(loaded.target.result);
+      const headers = (rows.shift() || []).map(value => value.trim());
+      if (!headers.length) throw new Error('Missing headers');
+      let imported = 0;
+      rows.forEach(values => {
+        const record = {};
+        headers.forEach((header, index) => { record[header] = (values[index] || '').trim(); });
+        if (!record.client || !record.title) return;
+        const id = uid('job');
+        state.projects.unshift({
+          id,
+          client: record.client,
+          title: record.title,
+          trade: record.trade || state.settings.primaryTrade || 'Other',
+          stage: record.stage || 'Inquiry',
+          source: record.source || 'Local / Manual',
+          sourceJobId: record.sourceJobId || '',
+          sourceStatus: record.sourceStatus || '',
+          assignee: record.assignee || '',
+          estimate: +record.estimate || 0,
+          invoiced: +record.invoiced || 0,
+          paid: +record.paid || 0,
+          priority: 'Medium',
+          depositRequested: 0,
+          depositReceived: 0,
+          scheduledDate: record.scheduledDate || '',
+          dueDate: record.dueDate || '',
+          materials: 0,
+          labor: 0,
+          subs: 0,
+          location: record.location || '',
+          contact: record.contact || '',
+          nextAction: record.nextAction || '',
+          scope: record.scope || '',
+          notes: record.notes || '',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+        queueSync('import', 'project', id);
+        imported += 1;
+      });
+      if (!imported) throw new Error('No jobs imported');
+      showToast(imported + ' jobs imported.');
       updateAll();
-      showToast('Data imported successfully.');
-    } catch(err) {
-      showToast('Failed to parse JSON file.', 'error');
+    } catch (error) {
+      showToast('Could not import that CSV. Use the template headers.', true);
     }
   };
   reader.readAsText(file);
-  e.target.value = '';
+  event.target.value = '';
 }
 
-// ── DELETE ─────────────────────────────────────────────────
-let pendingDel = null;
-function confirmDel(type, idx) {
-  pendingDel = { type, idx };
-  let label = '';
-  if (type === 'wo')  label = 'work order "' + (state.workOrders[idx].id) + '"';
-  if (type === 'exp') label = 'expense at "' + (state.expenses[idx].vendor) + '"';
-  if (type === 'mi')  label = 'mileage trip on ' + (state.mileage[idx].date);
-  showModal('Confirm Delete', 'Delete ' + label + '? This cannot be undone.', [
-    { label: 'Cancel', cls: 'btn-ghost', action: closeModal },
-    { label: 'Delete', cls: 'btn-red', action: executeDel }
-  ]);
+function exportJSON() {
+  downloadFile('ContractorCommandOS_Backup_' + todayLocal() + '.json', JSON.stringify(state, null, 2), 'application/json');
+  showToast('JSON backup exported.');
 }
 
-function executeDel() {
-  if (!pendingDel) return;
-  const { type, idx } = pendingDel;
-  if (type === 'wo')  state.workOrders.splice(idx, 1);
-  if (type === 'exp') state.expenses.splice(idx, 1);
-  if (type === 'mi')  state.mileage.splice(idx, 1);
-  pendingDel = null;
+function csvEscape(value) {
+  const text = String(value == null ? '' : value);
+  return /[",\n\r]/.test(text) ? '"' + text.replace(/"/g, '""') + '"' : text;
+}
+
+function exportCSV() {
+  const t = totals();
+  let csv = 'CONTRACTOR COMMAND OS EXPORT\r\n';
+  csv += 'Generated,' + csvEscape(new Date().toISOString()) + '\r\n';
+  csv += 'Business,' + csvEscape(state.settings.businessName) + '\r\n';
+  csv += 'Owner,' + csvEscape(state.settings.owner) + '\r\n';
+  csv += 'Primary Trade,' + csvEscape(state.settings.primaryTrade) + '\r\n';
+  csv += 'Tax Year,' + csvEscape(state.settings.taxYear) + '\r\n\r\n';
+  csv += 'SUMMARY\r\n';
+  csv += 'Revenue Collected,' + t.collected.toFixed(2) + '\r\n';
+  csv += 'Open Pipeline,' + t.pipeline.toFixed(2) + '\r\n';
+  csv += 'Outstanding AR,' + t.outstanding.toFixed(2) + '\r\n';
+  csv += 'Direct Job Costs,' + t.directCosts.toFixed(2) + '\r\n';
+  csv += 'Operating Expenses,' + t.expenses.toFixed(2) + '\r\n';
+  csv += 'Mileage Deduction,' + t.mileageDeduction.toFixed(2) + '\r\n';
+  csv += 'Estimated SE Tax,' + t.seTax.toFixed(2) + '\r\n\r\n';
+  csv += 'PROJECTS\r\n';
+  csv += 'Client,Title,Trade,Stage,Priority,Estimate,Invoiced,Paid,Deposit Requested,Deposit Received,Scheduled Date,Payment Due,Materials,Labor,Subs,Location,Contact,Next Action,Scope,Notes\r\n';
+  state.projects.forEach(project => { csv += [project.client, project.title, project.trade, project.stage, project.priority, project.estimate, project.invoiced, project.paid, project.depositRequested, project.depositReceived, project.scheduledDate, project.dueDate, project.materials, project.labor, project.subs, project.location, project.contact, project.nextAction, project.scope, project.notes].map(csvEscape).join(',') + '\r\n'; });
+  csv += '\r\nEXPENSES\r\nDate,Vendor,Category,Project,Amount,Notes\r\n';
+  state.expenses.forEach(expense => { csv += [expense.date, expense.vendor, expense.category, projectLabel(expense.projectId), expense.amount, expense.notes].map(csvEscape).join(',') + '\r\n'; });
+  csv += '\r\nMILEAGE\r\nDate,Project,Start,End,Miles,Purpose,Route,Deduction\r\n';
+  state.mileage.forEach(entry => { csv += [entry.date, projectLabel(entry.projectId), entry.start, entry.end, entry.miles, entry.purpose, entry.route, (entry.miles * (+state.settings.mileageRate || 0)).toFixed(2)].map(csvEscape).join(',') + '\r\n'; });
+  downloadFile('ContractorCommandOS_' + todayLocal() + '.csv', csv, 'text/csv;charset=utf-8');
+  showToast('CSV exported.');
+}
+
+function triggerImport() {
+  document.getElementById('import-file').click();
+}
+
+function handleImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = loaded => {
+    try {
+      const parsed = JSON.parse(loaded.target.result);
+      state = {
+        projects: Array.isArray(parsed.projects) ? parsed.projects : [],
+        expenses: Array.isArray(parsed.expenses) ? parsed.expenses : [],
+        mileage: Array.isArray(parsed.mileage) ? parsed.mileage : [],
+        settings: { ...DEFAULT_SETTINGS, ...(parsed.settings || {}) },
+        connectors: Array.isArray(parsed.connectors) ? parsed.connectors : [],
+        syncQueue: Array.isArray(parsed.syncQueue) ? parsed.syncQueue : [],
+        meta: { lastLocalSave: '', installMode: 'file', ...(parsed.meta || {}) }
+      };
+      ensureConnectors();
+      queueSync('import', 'system', 'json-backup');
+      resetProjectForm(false);
+      showToast('Backup imported.');
+      updateAll();
+    } catch (error) {
+      showToast('Could not read that JSON backup.', true);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function loadDemoData() {
+  const year = +state.settings.taxYear || new Date().getFullYear();
+  state = {
+    projects: [
+      { id: uid('job'), client:'Beacon Health Clinic', title:'Switch refresh and Wi-Fi survey', trade:'Network / Low Voltage', stage:'Awaiting Payment', priority:'High', estimate:6800, invoiced:6800, paid:4200, depositRequested:2000, depositReceived:2000, scheduledDate:year + '-04-03', dueDate:year + '-04-05', materials:1450, labor:2100, subs:0, location:'Denver, CO', contact:'Tina Morales', nextAction:'Send final completion photos and payment reminder', scope:'Replace core switch stack, verify AP placement, and document patching.', notes:'After-hours work was required for cutover.', createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() },
+      { id: uid('job'), client:'Summit Warehousing', title:'Camera expansion phase 2', trade:'Network / Low Voltage', stage:'Estimate Sent', source:'Field Nation', sourceJobId:'FN-883201', sourceStatus:'Applied', assignee:'Jordan Rivers', priority:'Medium', estimate:12400, invoiced:0, paid:0, depositRequested:0, depositReceived:0, scheduledDate:'', dueDate:'', materials:0, labor:0, subs:0, location:'Aurora, CO', contact:'Mike Chen', nextAction:'Call buyer and walk through alternates on conduit path', scope:'Add 12 cameras, NVR storage expansion, and cabling to dock lanes.', notes:'Need revision with alternate mounting hardware.', createdAt:new Date().toISOString(), updatedAt:new Date(Date.now() - 7 * 86400000).toISOString() },
+      { id: uid('job'), client:'Elm Street Studios', title:'Conference room AV install', trade:'General Contracting', stage:'Scheduled', source:'WorkMarket', sourceJobId:'WM-44219', sourceStatus:'Assigned', assignee:'Crew A', priority:'Medium', estimate:9200, invoiced:0, paid:0, depositRequested:3500, depositReceived:1500, scheduledDate:year + '-04-09', dueDate:year + '-04-19', materials:2800, labor:1800, subs:900, location:'Boulder, CO', contact:'Ariana Cole', nextAction:'Collect remaining deposit and confirm lift access', scope:'Display install, table box, cable management, DSP commissioning.', notes:'Parking instructions pending.', createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() },
+      { id: uid('job'), client:'Front Range Retail', title:'Emergency POS drop repair', trade:'Electrical', stage:'Paid', priority:'Low', estimate:1400, invoiced:1400, paid:1400, depositRequested:0, depositReceived:0, scheduledDate:year + '-04-01', dueDate:year + '-04-01', materials:180, labor:410, subs:0, location:'Lakewood, CO', contact:'Jen Patel', nextAction:'Archive warranty note', scope:'Repair damaged conduit and restore checkout lane power/data.', notes:'Resolved in one visit.', createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() }
+    ],
+    expenses: [
+      { id: uid('exp'), date: year + '-04-02', vendor: 'SupplyHouse', amount: 286.44, category: 'Materials', projectId: '', notes: 'Spare adapters and patch consumables' },
+      { id: uid('exp'), date: year + '-04-04', vendor: 'QuickBooks', amount: 65, category: 'Software', projectId: '', notes: 'Monthly subscription' },
+      { id: uid('exp'), date: year + '-04-05', vendor: 'Shell', amount: 74.82, category: 'Fuel', projectId: '', notes: 'Week mileage refill' }
+    ],
+    mileage: [
+      { id: uid('mi'), date: year + '-04-03', start: 55201.4, end: 55249.9, miles: 48.5, projectId: '', purpose: 'Clinic switch refresh and validation', route: 'Home → Clinic → Supply run → Home' },
+      { id: uid('mi'), date: year + '-04-04', start: 55249.9, end: 55284.2, miles: 34.3, projectId: '', purpose: 'Site walk and quote follow-up', route: 'Office → Warehouse → Office' }
+    ],
+    settings: { businessName:'Field Ops Example Co.', owner:'Jordan Rivers', primaryTrade:'Network / Low Voltage', taxYear:String(year), mileageRate:0.725, marginTarget:35, paymentTerms:'Net 15' },
+    connectors: [],
+    syncQueue: [],
+    meta: { lastLocalSave: '', installMode: 'file' }
+  };
+  ensureConnectors();
+  queueSync('seed', 'system', 'sample-data');
+  resetProjectForm(false);
+  document.getElementById('exp-date').value = todayLocal();
+  document.getElementById('mi-date').value = todayLocal();
+  document.getElementById('rv-date').value = todayLocal();
+  showToast('Demo data loaded.');
+  updateAll();
+}
+
+function confirmDelete(type, id) {
+  const messages = {
+    project: 'Delete this project? This removes its pipeline, financial, and field context from the app.',
+    expense: 'Delete this expense entry? This cannot be undone inside the file.',
+    mileage: 'Delete this mileage trip? This removes it from the deduction totals.'
+  };
+  openModal('Confirm Delete', messages[type], () => executeDelete(type, id), 'Delete');
+}
+
+function executeDelete(type, id) {
+  if (type === 'project') state.projects = state.projects.filter(item => item.id !== id);
+  if (type === 'expense') state.expenses = state.expenses.filter(item => item.id !== id);
+  if (type === 'mileage') state.mileage = state.mileage.filter(item => item.id !== id);
+  queueSync('delete', type, id);
+  if (editingProjectId === id) resetProjectForm(false);
   closeModal();
   showToast('Entry deleted.');
   updateAll();
 }
 
 function confirmClear() {
-  showModal('Clear All Data', 'This will permanently delete ALL work orders, expenses, and mileage records. Export a backup first. This cannot be undone.', [
-    { label: 'Cancel', cls: 'btn-ghost', action: closeModal },
-    { label: 'Delete Everything', cls: 'btn-red', action: () => {
-      state.workOrders = [];
-      state.expenses   = [];
-      state.mileage    = [];
-      closeModal();
-      saveState();
-      updateAll();
-      showToast('All data cleared.');
-    }}
-  ]);
+  openModal('Clear All Data', 'This will remove all projects, expenses, mileage logs, and saved settings from local storage after you confirm.', () => {
+    state = { projects: [], expenses: [], mileage: [], settings: { ...DEFAULT_SETTINGS }, connectors: [], syncQueue: [], meta: { lastLocalSave: '', installMode: 'file' } };
+    ensureConnectors();
+    queueSync('clear', 'system', 'all-data');
+    resetProjectForm(false);
+    closeModal();
+    showToast('All data cleared.');
+    updateAll();
+  }, 'Clear Everything');
 }
 
-// ── MODAL ──────────────────────────────────────────────────
-function showModal(title, msg, actions) {
+function openModal(title, message, action, actionLabel) {
+  pendingModalAction = action;
   document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-msg').textContent   = msg;
-  const ac = document.getElementById('modal-actions');
-  ac.innerHTML = '';
-  actions.forEach(a => {
-    const btn = document.createElement('button');
-    btn.className = 'btn ' + a.cls;
-    btn.textContent = a.label;
-    btn.onclick = a.action;
-    ac.appendChild(btn);
-  });
-  document.getElementById('modal-overlay').classList.add('show');
+  document.getElementById('modal-message').textContent = message;
+  document.getElementById('modal-actions').innerHTML = `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-danger" onclick="runModalAction()">${safeText(actionLabel || 'Confirm')}</button>`;
+  document.getElementById('modal-shell').classList.add('show');
 }
+
+function runModalAction() {
+  if (typeof pendingModalAction === 'function') pendingModalAction();
+}
+
 function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('show');
-  pendingDel = null;
+  pendingModalAction = null;
+  document.getElementById('modal-shell').classList.remove('show');
 }
-document.getElementById('modal-overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal-overlay')) closeModal();
-});
 
-// ── TOAST ──────────────────────────────────────────────────
-let toastTimer;
-function showToast(msg, type) {
+function showToast(message, isError) {
   const el = document.getElementById('toast');
-  el.textContent = (type === 'error' ? '\u26a0 ' : '\u2713 ') + msg;
-  el.style.borderColor = type === 'error' ? 'var(--red)' : 'var(--lime)';
-  el.style.color       = type === 'error' ? 'var(--red)' : 'var(--lime)';
-  el.classList.add('show');
+  el.textContent = message;
+  el.className = 'toast show' + (isError ? ' error' : '');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+  toastTimer = setTimeout(() => { el.className = 'toast'; }, 2800);
 }
 
-// ── PANEL NAVIGATION ───────────────────────────────────────
-function showPanel(id, btn) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+function showPanel(id, button) {
+  document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(nav => nav.classList.remove('active'));
   document.getElementById('p-' + id).classList.add('active');
-  if (btn) btn.classList.add('active');
+  if (button) {
+    button.classList.add('active');
+    return;
+  }
+  const match = Array.from(document.querySelectorAll('.nav-btn')).find(nav => nav.textContent.trim().toLowerCase() === id);
+  if (match) match.classList.add('active');
 }
 
-// ── ESCAPE HTML ────────────────────────────────────────────
-function esc(str) {
-  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function initStaticFields() {
+  populateSelect('job-trade', TRADES);
+  populateSelect('set-trade', TRADES);
+  populateSelect('job-stage', STAGES);
+  populateSelect('job-source', JOB_SOURCES);
+  populateSelect('exp-category', EXPENSE_CATEGORIES);
+  populateSelect('rv-category', EXPENSE_CATEGORIES);
+  populateYearSelect();
 }
 
-// ── INIT ───────────────────────────────────────────────────
+function initDefaults() {
+  document.getElementById('exp-date').value = todayLocal();
+  document.getElementById('mi-date').value = todayLocal();
+  document.getElementById('rv-date').value = todayLocal();
+  document.getElementById('job-trade').value = state.settings.primaryTrade || DEFAULT_SETTINGS.primaryTrade;
+  document.getElementById('job-stage').value = 'Inquiry';
+}
+
+function bindEvents() {
+  document.getElementById('mi-start').addEventListener('input', previewMileage);
+  document.getElementById('mi-end').addEventListener('input', previewMileage);
+  document.getElementById('modal-shell').addEventListener('click', event => {
+    if (event.target.id === 'modal-shell') closeModal();
+  });
+  window.addEventListener('online', updateConnectivity);
+  window.addEventListener('offline', updateConnectivity);
+}
+
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+initStaticFields();
 loadState();
-loadSettingsUI();
-['wo-date','exp-date','mi-date','rv-date'].forEach(id => {
-  const el = document.getElementById(id);
-  if (el) el.value = today();
-});
+ensureConnectors();
+initDefaults();
+resetProjectForm(false);
+bindEvents();
+previewMileage();
 updateAll();
+registerServiceWorker();
 </script>
 </body>
 </html>
-<section id="net-truth-calculator" style="background: #1a1a1a; color: #00ff41; padding: 20px; border: 1px solid #333; border-radius: 8px; font-family: monospace;">
-    <h2 style="border-bottom: 1px solid #00ff41;">REAL-TIME NET TRUTH</h2>
-    
-    <div class="input-group" style="margin-bottom: 15px;">
-        <label>Gross Pay ($):</label>
-        <input type="number" id="grossPay" placeholder="0.00" style="background: #000; color: #00ff41; border: 1px solid #00ff41; padding: 5px;">
-    </div>
-
-    <div class="input-group" style="margin-bottom: 15px;">
-        <label>Platform Fee:</label>
-        <select id="platformFee" style="background: #000; color: #00ff41; border: 1px solid #00ff41; padding: 5px;">
-            <option value="0.10">WorkMarket (10%)</option>
-            <option value="0.15">Field Nation (15%)</option>
-            <option value="0">Direct/Other (0%)</option>
-        </select>
-    </div>
-
-    <div class="input-group" style="margin-bottom: 15px;">
-        <label>Round Trip Miles:</label>
-        <input type="number" id="miles" placeholder="0" style="background: #000; color: #00ff41; border: 1px solid #00ff41; padding: 5px;">
-    </div>
-
-    <hr style="border: 0.5px solid #333;">
-
-    <div id="results" style="line-height: 1.6;">
-        <p>Platform Take: <span id="displayFee" style="color: #ff4444;">$0.00</span></p>
-        <p>Mileage Deduction: <span id="displayMiles" style="color: #44ff44;">$0.00</span></p>
-        <p>IRS Tax Reserve (SE + Income): <span id="displayTax" style="color: #ff4444;">$0.00</span></p>
-        <h3 style="background: #00ff41; color: #000; padding: 10px; display: inline-block;">TAKE HOME: <span id="displayNet">$0.00</span></h3>
-    </div>
-</section>
-
-<script>
-    const grossInput = document.getElementById('grossPay');
-    const feeInput = document.getElementById('platformFee');
-    const milesInput = document.getElementById('miles');
-
-    function calculateTruth() {
-        const gross = parseFloat(grossInput.value) || 0;
-        const feePercent = parseFloat(feeInput.value);
-        const miles = parseFloat(milesInput.value) || 0;
-
-        // 1. Platform Cut
-        const platformCut = gross * feePercent;
-        
-        // 2. Mileage Value (2026 IRS Rate: $0.725)
-        const mileageDeduction = miles * 0.725;
-
-        // 3. Taxable Income (Gross - Platform Fee - Mileage)
-        const taxableIncome = gross - platformCut - mileageDeduction;
-        
-        // 4. Tax Reserve (15.3% SE + 10% Est. Income Tax = ~25% total on remaining)
-        const taxReserve = taxableIncome > 0 ? taxableIncome * 0.25 : 0;
-
-        // 5. THE TRUTH
-        const netTruth = gross - platformCut - taxReserve;
-
-        // Update Display
-        document.getElementById('displayFee').innerText = `-$${platformCut.toFixed(2)}`;
-        document.getElementById('displayMiles').innerText = `+$${mileageDeduction.toFixed(2)} (Tax Shield)`;
-        document.getElementById('displayTax').innerText = `-$${taxReserve.toFixed(2)}`;
-        document.getElementById('displayNet').innerText = `$${netTruth.toFixed(2)}`;
-    }
-
-    [grossInput, feeInput, milesInput].forEach(el => el.addEventListener('input', calculateTruth));
-</script>
