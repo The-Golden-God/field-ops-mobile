@@ -355,9 +355,9 @@ tbody tr:hover td{background:#f9fafb} tbody tr:last-child td{border-bottom:none}
         <div class="card-head"><div><h3>Job Intake</h3><p>Enter a job here first. This is the main contractor record the rest of the app builds around.</p></div><button class="btn btn-ghost" onclick="resetProjectForm()">Clear Form</button></div>
         <div class="card-body">
           <div class="form-grid cols-4">
+            <div class="field"><label>Trade</label><select id="job-trade"></select></div>
             <div class="field"><label>Client</label><input type="text" id="job-client" placeholder="Acme Dental"></div>
             <div class="field"><label>Project / Work Order</label><input type="text" id="job-title" placeholder="MDF upgrade and AP replacement"></div>
-            <div class="field"><label>Trade</label><select id="job-trade"></select></div>
             <div class="field"><label>Stage</label><select id="job-stage"></select></div>
           </div>
           <div class="form-grid cols-4" style="margin-top:12px">
@@ -561,6 +561,7 @@ const DEFAULT_SETTINGS = {
   businessName: '',
   owner: '',
   primaryTrade: 'Network / Low Voltage',
+  lastJobTrade: 'Network / Low Voltage',
   taxYear: String(new Date().getFullYear()),
   mileageRate: 0.725,
   marginTarget: 35,
@@ -1068,6 +1069,7 @@ function saveProject() {
   const form = readProjectForm();
   if (!form.client || !form.title) return showToast('Client and project title are required.', true);
   if (form.paid > form.invoiced && form.invoiced > 0) return showToast('Paid amount cannot exceed invoiced amount.', true);
+  state.settings.lastJobTrade = form.trade || state.settings.lastJobTrade || state.settings.primaryTrade;
   const now = new Date().toISOString();
   if (editingProjectId) {
     Object.assign(state.projects.find(item => item.id === editingProjectId), form, { updatedAt: now });
@@ -1087,13 +1089,13 @@ function saveProject() {
 function resetProjectForm(announce = true) {
   editingProjectId = null;
   ['job-client','job-title','job-source-id','job-source-status','job-assignee','job-estimate','job-invoiced','job-paid','job-deposit-requested','job-deposit-received','job-materials','job-labor','job-subs','job-location','job-contact','job-next-action','job-scope','job-notes'].forEach(id => { document.getElementById(id).value = ''; });
-  document.getElementById('job-trade').value = state.settings.primaryTrade || DEFAULT_SETTINGS.primaryTrade;
+  document.getElementById('job-trade').value = state.settings.lastJobTrade || state.settings.primaryTrade || DEFAULT_SETTINGS.primaryTrade;
   document.getElementById('job-stage').value = 'Inquiry';
   document.getElementById('job-source').value = 'Local / Manual';
   document.getElementById('job-priority').value = 'Medium';
   document.getElementById('job-scheduled').value = '';
   document.getElementById('job-due').value = '';
-  document.getElementById('job-form-mode').textContent = 'Creating a new project';
+  document.getElementById('job-form-mode').textContent = 'Creating a new job';
   if (announce) showToast('Project form cleared.');
 }
 
@@ -1265,13 +1267,14 @@ function saveSettings() {
     businessName: document.getElementById('set-name').value.trim(),
     owner: document.getElementById('set-owner').value.trim(),
     primaryTrade: document.getElementById('set-trade').value,
+    lastJobTrade: state.settings.lastJobTrade || document.getElementById('set-trade').value,
     taxYear: document.getElementById('set-year').value,
     mileageRate: +document.getElementById('set-mile-rate').value || DEFAULT_SETTINGS.mileageRate,
     marginTarget: +document.getElementById('set-margin-target').value || DEFAULT_SETTINGS.marginTarget,
     paymentTerms: document.getElementById('set-terms').value.trim() || DEFAULT_SETTINGS.paymentTerms
   };
   queueSync('update', 'settings', 'business-profile');
-  document.getElementById('job-trade').value = state.settings.primaryTrade;
+  document.getElementById('job-trade').value = state.settings.lastJobTrade || state.settings.primaryTrade;
   previewMileage();
   showToast('Settings saved.');
   updateAll();
@@ -1592,13 +1595,17 @@ function initDefaults() {
   document.getElementById('exp-date').value = todayLocal();
   document.getElementById('mi-date').value = todayLocal();
   document.getElementById('rv-date').value = todayLocal();
-  document.getElementById('job-trade').value = state.settings.primaryTrade || DEFAULT_SETTINGS.primaryTrade;
+  document.getElementById('job-trade').value = state.settings.lastJobTrade || state.settings.primaryTrade || DEFAULT_SETTINGS.primaryTrade;
   document.getElementById('job-stage').value = 'Inquiry';
 }
 
 function bindEvents() {
   document.getElementById('mi-start').addEventListener('input', previewMileage);
   document.getElementById('mi-end').addEventListener('input', previewMileage);
+  document.getElementById('job-trade').addEventListener('change', event => {
+    state.settings.lastJobTrade = event.target.value;
+    saveState();
+  });
   document.getElementById('modal-shell').addEventListener('click', event => {
     if (event.target.id === 'modal-shell') closeModal();
   });
