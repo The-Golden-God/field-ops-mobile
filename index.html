@@ -203,6 +203,11 @@ tbody tr:hover td{background:#eef3f7} tbody tr:last-child td{border-bottom:none}
 .connector-note{
   border:1px solid var(--line);border-radius:12px;background:var(--bg-soft);padding:12px;color:var(--ink-soft);line-height:1.5
 }
+.summary-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.summary-box{border:1px solid var(--line);border-radius:12px;background:var(--bg-soft);padding:14px}
+.summary-box span{display:block;color:var(--ink-faint);font:700 .72rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em}
+.summary-box strong{display:block;margin-top:8px;font:700 1.2rem/1 var(--display)}
+.summary-box p{margin-top:8px;color:var(--ink-soft);font-size:.92rem;line-height:1.45}
 .lane-card{padding:16px}
 .lane-card h4{font:700 .98rem/1.1 var(--display);margin-bottom:10px}
 .lane-list{display:grid;gap:10px}
@@ -227,8 +232,8 @@ tbody tr:hover td{background:#eef3f7} tbody tr:last-child td{border-bottom:none}
 }
 .modal h3{font:700 1.22rem/1.1 var(--display);margin-bottom:10px}
 .footer-note{margin-top:16px;font-size:.92rem}
-@media (max-width:1240px){.stats-grid,.quad{grid-template-columns:repeat(2,1fr)}.split,.hero-grid,.three{grid-template-columns:1fr}.board{grid-template-columns:repeat(3,1fr)}}
-@media (max-width:920px){body{padding:16px}.cols-4,.cols-3,.cols-2,.project-cards,.project-metrics,.quad,.connector-grid{grid-template-columns:1fr}.board{grid-template-columns:repeat(2,1fr)}.action-item{grid-template-columns:auto 1fr}.action-item .num{grid-column:2}}
+@media (max-width:1240px){.stats-grid,.quad,.summary-strip{grid-template-columns:repeat(2,1fr)}.split,.hero-grid,.three{grid-template-columns:1fr}.board{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:920px){body{padding:16px}.cols-4,.cols-3,.cols-2,.project-cards,.project-metrics,.quad,.connector-grid,.summary-strip{grid-template-columns:1fr}.board{grid-template-columns:repeat(2,1fr)}.action-item{grid-template-columns:auto 1fr}.action-item .num{grid-column:2}}
 @media (max-width:640px){
   body{padding:12px}
   .topbar{align-items:flex-start;flex-direction:column}
@@ -424,6 +429,12 @@ tbody tr:hover td{background:#eef3f7} tbody tr:last-child td{border-bottom:none}
         <div class="stat"><div class="eyebrow">Operating Expenses</div><strong class="t-red" id="money-expenses">$0.00</strong><p>Fuel, software, supplies, admin, marketing, and other overhead.</p></div>
         <div class="stat"><div class="eyebrow">Tracked Gross Margin</div><strong class="t-teal" id="money-margin">$0.00</strong><p>Collected cash minus direct job costs.</p></div>
       </div>
+      <div class="summary-strip" style="margin-top:18px">
+        <div class="summary-box"><span>Deposit Pipeline</span><strong id="money-deposits">$0.00</strong><p>Requested deposits not yet received.</p></div>
+        <div class="summary-box"><span>Overdue A/R</span><strong id="money-overdue">$0.00</strong><p>Past-due invoice balances needing follow-up now.</p></div>
+        <div class="summary-box"><span>This Month In</span><strong id="money-month-in">$0.00</strong><p>Payments recorded this month.</p></div>
+        <div class="summary-box"><span>This Month Out</span><strong id="money-month-out">$0.00</strong><p>Expenses recorded this month.</p></div>
+      </div>
       <div class="split" style="margin-top:18px">
         <div class="card">
           <div class="card-head"><div><h3>Expense Log</h3><p>Capture overhead fast so project margin and tax estimates stay believable.</p></div></div>
@@ -444,7 +455,13 @@ tbody tr:hover td{background:#eef3f7} tbody tr:last-child td{border-bottom:none}
         </div>
         <div class="card">
           <div class="card-head"><div><h3>Accounts Receivable</h3><p>Follow-up targets sorted by urgency.</p></div></div>
-          <div class="card-body"><div class="aging-list" id="receivable-list"></div></div>
+          <div class="card-body">
+            <div class="btn-row" style="margin-top:0;margin-bottom:14px">
+              <button class="btn btn-secondary" onclick="applyReceivableAction('invoice')">Set Open Jobs To Awaiting Payment</button>
+              <button class="btn btn-muted" onclick="applyReceivableAction('due')">Set Due Date +7 Days</button>
+            </div>
+            <div class="aging-list" id="receivable-list"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -925,10 +942,22 @@ function renderMileage() {
 
 function renderMoney() {
   const t = totals();
+  const monthKey = todayLocal().slice(0, 7);
+  const openDeposits = state.projects.reduce((sum, project) => sum + Math.max((+project.depositRequested || 0) - (+project.depositReceived || 0), 0), 0);
+  const overdue = state.projects.reduce((sum, project) => sum + (isPast(project.dueDate) ? projectOutstanding(project) : 0), 0);
+  const monthIn = state.projects.reduce((sum, project) => {
+    const paidDate = (project.updatedAt || '').slice(0, 7);
+    return sum + (paidDate === monthKey ? (+project.paid || 0) : 0);
+  }, 0);
+  const monthOut = state.expenses.reduce((sum, expense) => sum + ((expense.date || '').slice(0, 7) === monthKey ? (+expense.amount || 0) : 0), 0);
   document.getElementById('money-invoiced').textContent = currency(t.invoiced);
   document.getElementById('money-costs').textContent = currency(t.directCosts);
   document.getElementById('money-expenses').textContent = currency(t.expenses);
   document.getElementById('money-margin').textContent = currency(t.grossMargin);
+  document.getElementById('money-deposits').textContent = currency(openDeposits);
+  document.getElementById('money-overdue').textContent = currency(overdue);
+  document.getElementById('money-month-in').textContent = currency(monthIn);
+  document.getElementById('money-month-out').textContent = currency(monthOut);
 }
 
 function renderTax() {
@@ -1181,6 +1210,30 @@ function saveExpense() {
   document.getElementById('exp-date').value = todayLocal();
   document.getElementById('exp-project').value = '';
   showToast('Expense logged.');
+  updateAll();
+}
+
+function applyReceivableAction(type) {
+  let touched = 0;
+  const today = new Date(todayLocal() + 'T00:00:00');
+  state.projects.forEach(project => {
+    if ((+project.invoiced || 0) <= (+project.paid || 0)) return;
+    if (type === 'invoice' && project.stage !== 'Awaiting Payment') {
+      project.stage = 'Awaiting Payment';
+      project.updatedAt = new Date().toISOString();
+      touched += 1;
+    }
+    if (type === 'due' && !project.dueDate) {
+      const due = new Date(today);
+      due.setDate(due.getDate() + 7);
+      project.dueDate = new Date(due.getTime() - due.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+      project.updatedAt = new Date().toISOString();
+      touched += 1;
+    }
+  });
+  if (!touched) return showToast('No open receivables needed that update.', true);
+  queueSync('bulk-update', 'project', type === 'invoice' ? 'awaiting-payment' : 'due-date');
+  showToast(touched + ' receivable updates applied.');
   updateAll();
 }
 
