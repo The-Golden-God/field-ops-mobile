@@ -300,10 +300,11 @@ tbody tr:hover td{background:#f9fafb} tbody tr:last-child td{border-bottom:none}
 
   <div class="nav-row">
     <button class="nav-btn active" onclick="showPanel('command', this)">Overview</button>
-    <button class="nav-btn" onclick="showPanel('jobs', this)">Jobs Board</button>
+    <button class="nav-btn" onclick="showPanel('capture', this)">New Job</button>
     <button class="nav-btn" onclick="showPanel('money', this)">Cash Flow</button>
     <button class="nav-btn" onclick="showPanel('field', this)">Field Log</button>
     <button class="nav-btn" onclick="showPanel('tax', this)">Tax View</button>
+    <button class="nav-btn" onclick="showPanel('jobs', this)">Jobs Board</button>
     <button class="nav-btn" onclick="showPanel('settings', this)">Admin</button>
   </div>
 
@@ -317,13 +318,23 @@ tbody tr:hover td{background:#f9fafb} tbody tr:last-child td{border-bottom:none}
       </div>
       <div class="split" style="margin-top:18px">
         <div class="card">
+          <div class="card-head"><div><h3>Start Here</h3><p>This is the fastest path for real use: enter a job, log money in or out, and keep the records current.</p></div><button class="btn btn-primary" onclick="showPanel('capture')">Open Job Intake</button></div>
+          <div class="card-body">
+            <div class="mini-list">
+              <div class="mini-item"><strong>1. Enter the job</strong><div class="meta">Client, source, amount, schedule, and next action. That creates the core record everything else attaches to.</div></div>
+              <div class="mini-item"><strong>2. Track money and field activity</strong><div class="meta">Expenses, mileage, invoice amount, paid amount, and receipt naming all stay tied to the work.</div></div>
+              <div class="mini-item"><strong>3. Use the board only when you need the bigger picture</strong><div class="meta">The board is now a supporting view, not the main thing you are forced to think in.</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
           <div class="card-head"><div><h3>Action Center</h3><p>The work that usually gets forgotten first: quote follow-up, deposit collection, and overdue invoices.</p></div><div class="pill payment" id="action-count">0 actions</div></div>
           <div class="card-body"><div class="action-list" id="action-list"></div></div>
         </div>
-        <div class="card">
-          <div class="card-head"><div><h3>Today Board</h3><p>Jobs scheduled for today or next up, plus the next action tied to each one.</p></div></div>
-          <div class="card-body"><div class="today-list" id="today-list"></div></div>
-        </div>
+      </div>
+      <div class="card" style="margin-top:18px">
+        <div class="card-head"><div><h3>Today</h3><p>Jobs scheduled for today or next up, plus the next action tied to each one.</p></div></div>
+        <div class="card-body"><div class="today-list" id="today-list"></div></div>
       </div>
       <div class="card" style="margin-top:18px">
         <div class="card-head"><div><h3>Pipeline by Stage</h3><p>A clean view of where jobs are stalling so you can decide whether the problem is close rate, scheduling, or collections.</p></div></div>
@@ -335,64 +346,56 @@ tbody tr:hover td{background:#f9fafb} tbody tr:last-child td{border-bottom:none}
       </div>
     </section>
 
+    <section class="panel" id="p-capture">
+      <div class="card">
+        <div class="card-head"><div><h3>Job Intake</h3><p>Enter a job here first. This is the main contractor record the rest of the app builds around.</p></div><button class="btn btn-ghost" onclick="resetProjectForm()">Clear Form</button></div>
+        <div class="card-body">
+          <div class="form-grid cols-4">
+            <div class="field"><label>Client</label><input type="text" id="job-client" placeholder="Acme Dental"></div>
+            <div class="field"><label>Project / Work Order</label><input type="text" id="job-title" placeholder="MDF upgrade and AP replacement"></div>
+            <div class="field"><label>Trade</label><select id="job-trade"></select></div>
+            <div class="field"><label>Stage</label><select id="job-stage"></select></div>
+          </div>
+          <div class="form-grid cols-4" style="margin-top:12px">
+            <div class="field"><label>Job Source</label><select id="job-source"></select></div>
+            <div class="field"><label>Source Job ID</label><input type="text" id="job-source-id" placeholder="FN-883201 or WM-44219"></div>
+            <div class="field"><label>Source Status</label><input type="text" id="job-source-status" placeholder="Applied, Assigned, Invited"></div>
+            <div class="field"><label>Assigned Tech / Crew</label><input type="text" id="job-assignee" placeholder="You, Crew A, Sub team"></div>
+          </div>
+          <div class="form-grid cols-4" style="margin-top:12px">
+            <div class="field"><label>Estimate Value</label><input type="number" id="job-estimate" min="0" step="0.01" placeholder="0.00"></div>
+            <div class="field"><label>Invoice Amount</label><input type="number" id="job-invoiced" min="0" step="0.01" placeholder="0.00"></div>
+            <div class="field"><label>Amount Paid</label><input type="number" id="job-paid" min="0" step="0.01" placeholder="0.00"></div>
+            <div class="field"><label>Priority</label><select id="job-priority"><option>High</option><option selected>Medium</option><option>Low</option></select></div>
+          </div>
+          <div class="form-grid cols-4" style="margin-top:12px">
+            <div class="field"><label>Deposit Requested</label><input type="number" id="job-deposit-requested" min="0" step="0.01" placeholder="0.00"></div>
+            <div class="field"><label>Deposit Received</label><input type="number" id="job-deposit-received" min="0" step="0.01" placeholder="0.00"></div>
+            <div class="field"><label>Scheduled Date</label><input type="date" id="job-scheduled"></div>
+            <div class="field"><label>Payment Due</label><input type="date" id="job-due"></div>
+          </div>
+          <div class="form-grid cols-3" style="margin-top:12px">
+            <div class="field"><label>Materials Cost</label><input type="number" id="job-materials" min="0" step="0.01" placeholder="0.00"></div>
+            <div class="field"><label>Labor Cost</label><input type="number" id="job-labor" min="0" step="0.01" placeholder="0.00"></div>
+            <div class="field"><label>Subcontractors</label><input type="number" id="job-subs" min="0" step="0.01" placeholder="0.00"></div>
+          </div>
+          <div class="form-grid cols-3" style="margin-top:12px">
+            <div class="field"><label>Site / Address</label><input type="text" id="job-location" placeholder="123 Main St, Denver CO"></div>
+            <div class="field"><label>Contact</label><input type="text" id="job-contact" placeholder="Samantha Lee"></div>
+            <div class="field"><label>Next Action</label><input type="text" id="job-next-action" placeholder="Confirm access window and send deposit link"></div>
+          </div>
+          <div class="form-grid cols-2" style="margin-top:12px">
+            <div class="field"><label>Scope</label><textarea id="job-scope" placeholder="Install new rack UPS, patch panel cleanup, AP cutover."></textarea></div>
+            <div class="field"><label>Field Notes</label><textarea id="job-notes" placeholder="Badge needed after 8am. IDF ladder clearance is tight."></textarea></div>
+          </div>
+          <div class="btn-row"><button class="btn btn-primary" onclick="saveProject()">Save Job</button><button class="btn btn-secondary" onclick="duplicateProject()">Duplicate Selected</button><button class="btn btn-muted" onclick="markProjectPaid()">Mark Selected Paid</button><span class="meta" id="job-form-mode">Creating a new job</span></div>
+        </div>
+      </div>
+    </section>
+
     <section class="panel" id="p-jobs">
       <div class="split">
-        <div class="card">
-          <div class="card-head"><div><h3>Project Intake + Update</h3><p>Create a new opportunity or update an active project without hunting around the app.</p></div><button class="btn btn-ghost" onclick="resetProjectForm()">Clear Form</button></div>
-          <div class="card-body">
-            <div class="form-grid cols-4">
-              <div class="field"><label>Client</label><input type="text" id="job-client" placeholder="Acme Dental"></div>
-              <div class="field"><label>Project / Work Order</label><input type="text" id="job-title" placeholder="MDF upgrade and AP replacement"></div>
-              <div class="field"><label>Trade</label><select id="job-trade"></select></div>
-              <div class="field"><label>Stage</label><select id="job-stage"></select></div>
-            </div>
-            <div class="form-grid cols-4" style="margin-top:12px">
-              <div class="field"><label>Job Source</label><select id="job-source"></select></div>
-              <div class="field"><label>Source Job ID</label><input type="text" id="job-source-id" placeholder="FN-883201 or WM-44219"></div>
-              <div class="field"><label>Source Status</label><input type="text" id="job-source-status" placeholder="Applied, Assigned, Invited"></div>
-              <div class="field"><label>Assigned Tech / Crew</label><input type="text" id="job-assignee" placeholder="You, Crew A, Sub team"></div>
-            </div>
-            <div class="form-grid cols-4" style="margin-top:12px">
-              <div class="field"><label>Estimate Value</label><input type="number" id="job-estimate" min="0" step="0.01" placeholder="0.00"></div>
-              <div class="field"><label>Invoice Amount</label><input type="number" id="job-invoiced" min="0" step="0.01" placeholder="0.00"></div>
-              <div class="field"><label>Amount Paid</label><input type="number" id="job-paid" min="0" step="0.01" placeholder="0.00"></div>
-              <div class="field"><label>Priority</label><select id="job-priority"><option>High</option><option selected>Medium</option><option>Low</option></select></div>
-            </div>
-            <div class="form-grid cols-4" style="margin-top:12px">
-              <div class="field"><label>Deposit Requested</label><input type="number" id="job-deposit-requested" min="0" step="0.01" placeholder="0.00"></div>
-              <div class="field"><label>Deposit Received</label><input type="number" id="job-deposit-received" min="0" step="0.01" placeholder="0.00"></div>
-              <div class="field"><label>Scheduled Date</label><input type="date" id="job-scheduled"></div>
-              <div class="field"><label>Payment Due</label><input type="date" id="job-due"></div>
-            </div>
-            <div class="form-grid cols-3" style="margin-top:12px">
-              <div class="field"><label>Materials Cost</label><input type="number" id="job-materials" min="0" step="0.01" placeholder="0.00"></div>
-              <div class="field"><label>Labor Cost</label><input type="number" id="job-labor" min="0" step="0.01" placeholder="0.00"></div>
-              <div class="field"><label>Subcontractors</label><input type="number" id="job-subs" min="0" step="0.01" placeholder="0.00"></div>
-            </div>
-            <div class="form-grid cols-3" style="margin-top:12px">
-              <div class="field"><label>Site / Address</label><input type="text" id="job-location" placeholder="123 Main St, Denver CO"></div>
-              <div class="field"><label>Contact</label><input type="text" id="job-contact" placeholder="Samantha Lee"></div>
-              <div class="field"><label>Next Action</label><input type="text" id="job-next-action" placeholder="Confirm access window and send deposit link"></div>
-            </div>
-            <div class="form-grid cols-2" style="margin-top:12px">
-              <div class="field"><label>Scope</label><textarea id="job-scope" placeholder="Install new rack UPS, patch panel cleanup, AP cutover."></textarea></div>
-              <div class="field"><label>Field Notes</label><textarea id="job-notes" placeholder="Badge needed after 8am. IDF ladder clearance is tight."></textarea></div>
-            </div>
-            <div class="btn-row"><button class="btn btn-primary" onclick="saveProject()">Save Project</button><button class="btn btn-secondary" onclick="duplicateProject()">Duplicate Selected</button><button class="btn btn-muted" onclick="markProjectPaid()">Mark Selected Paid</button><span class="meta" id="job-form-mode">Creating a new project</span></div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-head"><div><h3>How This Is Meant To Be Used</h3><p>A simple operating rhythm that works for both service calls and project-based jobs.</p></div></div>
-          <div class="card-body">
-            <div class="mini-list">
-              <div class="mini-item"><strong>1. Intake every opportunity</strong><div class="meta">Even small service calls belong in the system so follow-ups and collection risk stay visible.</div></div>
-              <div class="mini-item"><strong>2. Keep stage and next action current</strong><div class="meta">Those two fields power the action center, daily board, and cash forecast.</div></div>
-              <div class="mini-item"><strong>3. Track estimated and actuals together</strong><div class="meta">That closes the loop between selling, delivering, and protecting margin.</div></div>
-              <div class="mini-item"><strong>4. Record paid amounts the same day</strong><div class="meta">Your collected cash and A/R become accurate enough to actually manage from.</div></div>
-            </div>
-            <div class="footer-note">Built for network field technicians, low-voltage crews, electricians, HVAC, plumbing, remodeling, landscaping, cleaning, handyman work, and other contractor workflows that mix quoting, scheduling, dispatch, and field execution.</div>
-          </div>
-        </div>
+        <div class="card"><div class="card-head"><div><h3>How To Use The Board</h3><p>The board is for review, follow-up, and source awareness after the job has already been entered.</p></div></div><div class="card-body"><div class="mini-list"><div class="mini-item"><strong>Enter the job in New Job first</strong><div class="meta">That creates the main record the rest of the app works from.</div></div><div class="mini-item"><strong>Use the board to scan all work in motion</strong><div class="meta">Especially useful once you have multiple sources, crews, and payment statuses to track.</div></div><div class="mini-item"><strong>Treat it like a control panel, not the starting point</strong><div class="meta">The app should feel like recordkeeping first and board view second.</div></div></div></div></div>
       </div>
       <div class="card" style="margin-top:18px">
         <div class="card-head"><div><h3>Jobs Board</h3><p>Connected platform work and local jobs live in one board. Tap any project into the form to update it.</p></div><div class="pill active" id="project-count">0 projects</div></div>
@@ -1595,25 +1598,4 @@ function bindEvents() {
   document.getElementById('modal-shell').addEventListener('click', event => {
     if (event.target.id === 'modal-shell') closeModal();
   });
-  window.addEventListener('online', updateConnectivity);
-  window.addEventListener('offline', updateConnectivity);
-}
-
-function registerServiceWorker() {
-  if (!('serviceWorker' in navigator)) return;
-  if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
-}
-
-initStaticFields();
-loadState();
-ensureConnectors();
-initDefaults();
-resetProjectForm(false);
-bindEvents();
-previewMileage();
-updateAll();
-registerServiceWorker();
-</script>
-</body>
-</html>
+  windo
