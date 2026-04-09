@@ -1,0 +1,23 @@
+{
+  "name": "Contractor Command OS",
+  "short_name": "Contractor OS",
+  "description": "Offline-friendly contractor workspace for jobs, cash flow, field logs, and admin.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#e8edf1",
+  "theme_color": "#243647",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='36' fill='%23111827'/%3E%3Crect x='18' y='18' width='14' height='156' rx='7' fill='%23d97706'/%3E%3Ctext x='96' y='112' font-family='Arial, sans-serif' font-size='72' font-weight='700' text-anchor='middle' fill='white'%3ECO%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='96' fill='%23111827'/%3E%3Crect x='48' y='48' width='36' height='416' rx='18' fill='%23d97706'/%3E%3Ctext x='256' y='302' font-family='Arial, sans-serif' font-size='180' font-weight='700' text-anchor='middle' fill='white'%3ECO%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
