@@ -192,6 +192,18 @@ tbody tr:hover td{background:#eef3f7} tbody tr:last-child td{border-bottom:none}
 .project-cards{grid-template-columns:repeat(2,1fr);gap:14px}
 .project-card{padding:18px;display:grid;gap:12px}
 .project-head{display:flex;justify-content:space-between;gap:12px}
+.project-meta-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.project-meta-box{
+  border:1px solid var(--line);border-radius:12px;background:#e8eef3;padding:10px 12px
+}
+.project-meta-box span{display:block;color:var(--ink-faint);font:700 .7rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em}
+.project-meta-box strong{display:block;margin-top:7px;font:700 .98rem/1.25 var(--display)}
+.project-attachments{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.project-next{
+  border-left:4px solid #d97706;padding:12px 14px;border-radius:12px;background:#e7edf2
+}
+.project-next span{display:block;color:var(--ink-faint);font:700 .7rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em}
+.project-next strong{display:block;margin-top:8px;font:700 .98rem/1.35 var(--display)}
 .project-metrics{grid-template-columns:repeat(3,1fr);gap:10px}
 .connector-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
 .connector-card{
@@ -202,6 +214,23 @@ tbody tr:hover td{background:#eef3f7} tbody tr:last-child td{border-bottom:none}
 .connector-actions{display:flex;gap:8px;flex-wrap:wrap}
 .connector-note{
   border:1px solid var(--line);border-radius:12px;background:var(--bg-soft);padding:12px;color:var(--ink-soft);line-height:1.5
+}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap}
+.filter-chip{
+  border:1px solid var(--line);background:#e5ebf0;color:var(--ink-soft);border-radius:999px;
+  padding:8px 12px;font:700 .76rem/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;cursor:pointer
+}
+.filter-chip.active{background:#111827;color:#f9fafb;border-color:#111827}
+.mobile-note{display:none}
+.attachment-list{display:grid;gap:10px}
+.attachment-chip{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  border:1px solid var(--line);border-radius:12px;background:var(--bg-soft);padding:10px 12px
+}
+.thumb-row{display:flex;gap:10px;flex-wrap:wrap}
+.thumb{
+  width:84px;height:84px;border-radius:12px;border:1px solid var(--line);
+  object-fit:cover;background:#dde5eb
 }
 .summary-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .summary-box{border:1px solid var(--line);border-radius:12px;background:var(--bg-soft);padding:14px}
@@ -251,6 +280,10 @@ tbody tr:hover td{background:#eef3f7} tbody tr:last-child td{border-bottom:none}
   .card-body{padding:16px}
   .table-wrap{border-radius:12px}
   table{min-width:760px}
+  .mobile-note{display:block}
+  .project-head{display:grid}
+  .project-meta-grid{grid-template-columns:1fr}
+  .project-card .btn-row .btn{flex:1 1 100%}
 }
 </style>
 </head>
@@ -397,6 +430,18 @@ tbody tr:hover td{background:#eef3f7} tbody tr:last-child td{border-bottom:none}
             <div class="field"><label>Scope</label><textarea id="job-scope" placeholder="Install new rack UPS, patch panel cleanup, AP cutover."></textarea></div>
             <div class="field"><label>Field Notes</label><textarea id="job-notes" placeholder="Badge needed after 8am. IDF ladder clearance is tight."></textarea></div>
           </div>
+          <div class="form-grid cols-2" style="margin-top:12px">
+            <div class="field">
+              <label>Job Photos / Attachments</label>
+              <input type="file" id="job-attachments" accept="image/*" multiple>
+            </div>
+            <div class="field">
+              <label>Attachment Notes</label>
+              <div class="meta">Add up to 3 small images for proof-of-work, site condition, or reference photos.</div>
+            </div>
+          </div>
+          <div class="attachment-list" id="job-attachment-list" style="margin-top:12px"></div>
+          <div class="thumb-row" id="job-attachment-thumbs" style="margin-top:12px"></div>
           <div class="btn-row"><button class="btn btn-primary" onclick="saveProject()">Save Job</button><button class="btn btn-secondary" onclick="duplicateProject()">Duplicate Selected</button><button class="btn btn-muted" onclick="markProjectPaid()">Mark Selected Paid</button><span class="meta" id="job-form-mode">Creating a new job</span></div>
         </div>
       </div>
@@ -409,12 +454,14 @@ tbody tr:hover td{background:#eef3f7} tbody tr:last-child td{border-bottom:none}
       <div class="card" style="margin-top:18px">
         <div class="card-head"><div><h3>Jobs Board</h3><p>Connected platform work and local jobs live in one board. Tap any project into the form to update it.</p></div><div class="pill active" id="project-count">0 projects</div></div>
         <div class="card-body">
+          <div class="filter-row" id="job-filters" style="margin-bottom:14px"></div>
           <div class="btn-row" style="margin-top:0;margin-bottom:18px">
             <button class="btn btn-muted" onclick="downloadTemplate('fieldnation')">Field Nation CSV Template</button>
             <button class="btn btn-muted" onclick="downloadTemplate('workmarket')">WorkMarket CSV Template</button>
             <button class="btn btn-secondary" onclick="triggerJobsImport()">Import Jobs CSV</button>
             <input id="jobs-import-file" type="file" accept=".csv" style="display:none" onchange="handleJobsImport(event)">
           </div>
+          <div class="mobile-note meta" style="margin-bottom:14px">On phone, use the cards first. The full table is still available below for deeper review.</div>
           <div class="quad" style="margin-bottom:18px" id="lane-board"></div>
           <div class="project-cards" id="project-cards"></div>
           <div class="table-wrap" style="margin-top:18px"><table><thead><tr><th>Client / Job</th><th>Source</th><th>Stage</th><th>Scheduled</th><th>Estimate</th><th>Invoiced</th><th>Paid</th><th>Outstanding</th><th>Margin</th><th>Next Action</th><th>Actions</th></tr></thead><tbody id="project-table"></tbody></table></div>
@@ -496,6 +543,11 @@ tbody tr:hover td{background:#eef3f7} tbody tr:last-child td{border-bottom:none}
               <div class="field"><label>Amount</label><input type="number" id="rv-amount" min="0" step="0.01" placeholder="47.82"></div>
               <div class="field"><label>Category</label><select id="rv-category"></select></div>
             </div>
+            <div class="form-grid cols-2" style="margin-top:12px">
+              <div class="field"><label>Attach Receipt Image</label><input type="file" id="rv-attachment" accept="image/*"></div>
+              <div class="field"><label>Receipt Preview</label><div class="meta">Optional now, but useful for tying proof to the expense record.</div></div>
+            </div>
+            <div class="thumb-row" id="rv-attachment-preview" style="margin-top:12px"></div>
             <div class="btn-row"><button class="btn btn-primary" onclick="generateFilename()">Generate</button><button class="btn btn-muted" onclick="copyFilename()">Copy</button><button class="btn btn-secondary" onclick="receiptToExpense()">Log As Expense</button></div>
             <div class="empty" style="margin-top:16px"><strong style="display:block;margin-bottom:8px">Suggested filename</strong><div id="rv-output" class="num">No filename generated yet.</div></div>
             <div class="footer-note">Format: <span class="num">YYYY-MM-DD_Vendor_Amount_Category.pdf</span>. The point is less perfection and more consistency so files remain searchable later.</div>
@@ -598,6 +650,9 @@ let state = {
 let editingProjectId = null;
 let pendingModalAction = null;
 let toastTimer = null;
+let pendingJobAttachments = [];
+let pendingReceiptAttachment = null;
+let currentJobFilter = 'all';
 
 function todayLocal() {
   const now = new Date();
@@ -619,6 +674,16 @@ function safeText(value) {
 
 function uid(prefix) {
   return prefix + '_' + Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4);
+}
+
+function tinyAttachment(file, dataUrl) {
+  return {
+    id: uid('att'),
+    name: file.name,
+    type: file.type || 'image/*',
+    size: file.size || 0,
+    dataUrl
+  };
 }
 
 function daysSince(dateStr) {
@@ -659,6 +724,17 @@ function isConnectedSource(source) {
 
 function isLeadSource(source) {
   return ['Thumbtack', 'Angi', 'Google LSA', 'Referral'].includes(source);
+}
+
+function filteredProjects() {
+  const items = state.projects.slice();
+  if (currentJobFilter === 'all') return items;
+  if (currentJobFilter === 'mine') return items.filter(project => !project.assignee || /you/i.test(project.assignee));
+  if (currentJobFilter === 'unpaid') return items.filter(project => projectOutstanding(project) > 0);
+  if (currentJobFilter === 'due') return items.filter(project => isPast(project.dueDate) || (project.dueDate && project.dueDate <= todayLocal().slice(0, 10)));
+  if (currentJobFilter === 'connected') return items.filter(project => isConnectedSource(project.source));
+  if (currentJobFilter === 'today') return items.filter(project => project.scheduledDate === todayLocal());
+  return items;
 }
 
 function projectLabel(projectId) {
@@ -853,11 +929,22 @@ function updateDashboard() {
 }
 
 function renderProjects() {
-  document.getElementById('project-count').textContent = state.projects.length + ' projects';
-  const connected = state.projects.filter(project => isConnectedSource(project.source)).slice(0, 4);
-  const local = state.projects.filter(project => !isConnectedSource(project.source) || project.source === 'Local / Manual' || project.source === 'Direct Client').slice(0, 4);
-  const leads = state.projects.filter(project => isLeadSource(project.source) && ['Inquiry','Estimate Sent'].includes(project.stage)).slice(0, 4);
-  const opportunities = state.projects.filter(project => ['Inquiry','Estimate Sent','Deposit Needed'].includes(project.stage)).slice(0, 4);
+  const visibleProjects = filteredProjects();
+  document.getElementById('project-count').textContent = visibleProjects.length + ' projects';
+  const connected = visibleProjects.filter(project => isConnectedSource(project.source)).slice(0, 4);
+  const local = visibleProjects.filter(project => !isConnectedSource(project.source) || project.source === 'Local / Manual' || project.source === 'Direct Client').slice(0, 4);
+  const leads = visibleProjects.filter(project => isLeadSource(project.source) && ['Inquiry','Estimate Sent'].includes(project.stage)).slice(0, 4);
+  const opportunities = visibleProjects.filter(project => ['Inquiry','Estimate Sent','Deposit Needed'].includes(project.stage)).slice(0, 4);
+
+  const filters = [
+    { id: 'all', label: 'All Jobs' },
+    { id: 'mine', label: 'My Jobs' },
+    { id: 'unpaid', label: 'Unpaid' },
+    { id: 'due', label: 'Due Soon' },
+    { id: 'connected', label: 'Connected' },
+    { id: 'today', label: 'Today' }
+  ];
+  document.getElementById('job-filters').innerHTML = filters.map(filter => `<button class="filter-chip ${currentJobFilter === filter.id ? 'active' : ''}" onclick="setJobFilter('${filter.id}')">${filter.label}</button>`).join('');
 
   document.getElementById('lane-board').innerHTML = [
     { title: 'Connected Jobs', items: connected, empty: 'No platform-linked jobs yet.' },
@@ -879,26 +966,33 @@ function renderProjects() {
     </div>
   `).join('');
 
-  if (!state.projects.length) {
+  if (!visibleProjects.length) {
     document.getElementById('project-cards').innerHTML = '<div class="empty">No projects yet. Start with a real inquiry, service call, or quote. This app gets better as soon as stage and next action become part of your habit.</div>';
     document.getElementById('project-table').innerHTML = '<tr><td colspan="10"><div class="empty">The jobs table will populate here after the first project is saved.</div></td></tr>';
     return;
   }
-  document.getElementById('project-cards').innerHTML = state.projects.map(project => `
+  document.getElementById('project-cards').innerHTML = visibleProjects.map(project => `
     <div class="project-card">
       <div class="project-head">
         <div><strong>${safeText(project.client)}</strong><div class="meta">${safeText(project.title)}</div><div class="fine" style="margin-top:4px">${safeText(project.source || 'Local / Manual')}${project.sourceJobId ? ' · ' + safeText(project.sourceJobId) : ''}</div></div>
         <div style="display:grid;gap:8px;justify-items:end"><span class="pill ${projectPillClass(project.stage)}">${safeText(project.stage)}</span><span class="pill ${priorityClass(project.priority)}">${safeText(project.priority)} priority</span></div>
+      </div>
+      <div class="project-meta-grid">
+        <div class="project-meta-box"><span>Assigned</span><strong>${safeText(project.assignee || 'You')}</strong></div>
+        <div class="project-meta-box"><span>Due Date</span><strong>${safeText(project.dueDate || 'Not set')}</strong></div>
+        <div class="project-meta-box"><span>Trade</span><strong>${safeText(project.trade || 'General')}</strong></div>
+        <div class="project-meta-box"><span>Source Status</span><strong>${safeText(project.sourceStatus || 'Local')}</strong></div>
       </div>
       <div class="project-metrics">
         <div class="mini-metric"><span>Estimate</span><strong>${currency(project.estimate)}</strong></div>
         <div class="mini-metric"><span>Outstanding</span><strong>${currency(projectOutstanding(project))}</strong></div>
         <div class="mini-metric"><span>Margin</span><strong>${currency(projectMargin(project))}</strong></div>
       </div>
-      <div class="stack"><div class="muted">${safeText(project.location || 'No site listed')}</div><div class="fine">${safeText(project.nextAction || 'No next action set')}</div></div>
+      <div class="project-attachments fine"><span>${(project.attachments || []).length} attachment(s)</span><span>${safeText(project.location || 'No site listed')}</span></div>
+      <div class="project-next"><span>Next Action</span><strong>${safeText(project.nextAction || 'No next action set')}</strong></div>
       <div class="btn-row" style="margin-top:0"><button class="btn btn-muted" onclick="editProject('${project.id}')">Edit</button><button class="btn btn-ghost" onclick="advanceStage('${project.id}')">Advance Stage</button><button class="btn btn-danger" onclick="confirmDelete('project','${project.id}')">Delete</button></div>
     </div>`).join('');
-  document.getElementById('project-table').innerHTML = state.projects.map(project => `
+  document.getElementById('project-table').innerHTML = visibleProjects.map(project => `
     <tr>
       <td><div class="stack"><strong>${safeText(project.client)} · ${safeText(project.title)}</strong><span class="fine">${safeText(project.trade)} · ${safeText(project.contact || 'No contact')}</span></div></td>
       <td><div class="stack"><span>${safeText(project.source || 'Local / Manual')}</span><span class="fine">${safeText(project.sourceStatus || project.sourceJobId || '—')}</span></div></td>
@@ -1090,7 +1184,8 @@ function readProjectForm() {
     contact: document.getElementById('job-contact').value.trim(),
     nextAction: document.getElementById('job-next-action').value.trim(),
     scope: document.getElementById('job-scope').value.trim(),
-    notes: document.getElementById('job-notes').value.trim()
+    notes: document.getElementById('job-notes').value.trim(),
+    attachments: pendingJobAttachments.slice()
   };
 }
 
@@ -1124,6 +1219,9 @@ function resetProjectForm(announce = true) {
   document.getElementById('job-priority').value = 'Medium';
   document.getElementById('job-scheduled').value = '';
   document.getElementById('job-due').value = '';
+  pendingJobAttachments = [];
+  if (document.getElementById('job-attachments')) document.getElementById('job-attachments').value = '';
+  renderJobAttachments();
   document.getElementById('job-form-mode').textContent = 'Creating a new job';
   if (announce) showToast('Project form cleared.');
 }
@@ -1156,6 +1254,8 @@ function editProject(id) {
   document.getElementById('job-next-action').value = project.nextAction || '';
   document.getElementById('job-scope').value = project.scope || '';
   document.getElementById('job-notes').value = project.notes || '';
+  pendingJobAttachments = Array.isArray(project.attachments) ? project.attachments.slice() : [];
+  renderJobAttachments();
   document.getElementById('job-form-mode').textContent = 'Editing ' + project.client + ' · ' + project.title;
   showPanel('jobs');
 }
@@ -1309,8 +1409,11 @@ function receiptToExpense() {
   const category = document.getElementById('rv-category').value;
   if (!vendor || amount <= 0 || !date) return showToast('Complete the receipt fields first.', true);
   const id = uid('exp');
-  state.expenses.unshift({ id, date, vendor, amount, category, projectId: '', notes: 'Logged from receipt vault' });
+  state.expenses.unshift({ id, date, vendor, amount, category, projectId: '', notes: 'Logged from receipt vault', attachment: pendingReceiptAttachment });
   queueSync('create', 'expense', id);
+  pendingReceiptAttachment = null;
+  if (document.getElementById('rv-attachment')) document.getElementById('rv-attachment').value = '';
+  renderReceiptAttachment();
   showToast('Receipt logged as expense.');
   updateAll();
 }
@@ -1343,6 +1446,41 @@ function downloadFile(filename, content, mime) {
   link.click();
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 300);
+}
+
+function readImageFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderJobAttachments() {
+  const list = document.getElementById('job-attachment-list');
+  const thumbs = document.getElementById('job-attachment-thumbs');
+  if (!list || !thumbs) return;
+  list.innerHTML = pendingJobAttachments.length
+    ? pendingJobAttachments.map(item => `<div class="attachment-chip"><span>${safeText(item.name)}</span><button class="btn btn-danger" onclick="removeJobAttachment('${item.id}')">Remove</button></div>`).join('')
+    : '<div class="meta">No job attachments added yet.</div>';
+  thumbs.innerHTML = pendingJobAttachments.map(item => `<img class="thumb" src="${item.dataUrl}" alt="${safeText(item.name)}">`).join('');
+}
+
+function removeJobAttachment(id) {
+  pendingJobAttachments = pendingJobAttachments.filter(item => item.id !== id);
+  renderJobAttachments();
+}
+
+function setJobFilter(filterId) {
+  currentJobFilter = filterId;
+  renderProjects();
+}
+
+function renderReceiptAttachment() {
+  const preview = document.getElementById('rv-attachment-preview');
+  if (!preview) return;
+  preview.innerHTML = pendingReceiptAttachment ? `<img class="thumb" src="${pendingReceiptAttachment.dataUrl}" alt="${safeText(pendingReceiptAttachment.name)}">` : '<div class="meta">No receipt image attached.</div>';
 }
 
 function downloadTemplate(type) {
@@ -1659,6 +1797,34 @@ function bindEvents() {
     state.settings.lastJobTrade = event.target.value;
     saveState();
   });
+  document.getElementById('job-attachments').addEventListener('change', async event => {
+    const files = Array.from(event.target.files || []);
+    for (const file of files) {
+      if (pendingJobAttachments.length >= 3) {
+        showToast('Keep job attachments to 3 images for now.', true);
+        break;
+      }
+      if ((file.size || 0) > 900000) {
+        showToast('Use smaller images under about 900KB each.', true);
+        continue;
+      }
+      const dataUrl = await readImageFile(file);
+      pendingJobAttachments.push(tinyAttachment(file, dataUrl));
+    }
+    event.target.value = '';
+    renderJobAttachments();
+  });
+  document.getElementById('rv-attachment').addEventListener('change', async event => {
+    const file = (event.target.files || [])[0];
+    if (!file) return;
+    if ((file.size || 0) > 900000) {
+      showToast('Use a smaller receipt image under about 900KB.', true);
+      event.target.value = '';
+      return;
+    }
+    pendingReceiptAttachment = tinyAttachment(file, await readImageFile(file));
+    renderReceiptAttachment();
+  });
   document.getElementById('modal-shell').addEventListener('click', event => {
     if (event.target.id === 'modal-shell') closeModal();
   });
@@ -1687,6 +1853,7 @@ initDefaults();
 resetProjectForm(false);
 bindEvents();
 previewMileage();
+renderReceiptAttachment();
 updateAll();
 registerServiceWorker();
 </script>
